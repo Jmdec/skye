@@ -123,14 +123,7 @@ export function Header() {
                         <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
                         <p className="text-xs text-foreground/50 truncate">{user.email}</p>
                       </div>
-                      <Link
-                        href="/orders"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-foreground/80 hover:bg-accent/10 transition-colors"
-                      >
-                        <ShoppingBag className="w-4 h-4" />
-                        My Orders
-                      </Link>
+                      
                       {user.role === "admin" && (
                         <Link
                           href="/admin"
