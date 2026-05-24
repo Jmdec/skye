@@ -208,7 +208,7 @@ export function Footer() {
           <p className="text-xs text-pink-200/60 font-light">
             &copy; {currentYear} Skye Avenue. All rights reserved.
           </p>
-          <div className="flex gap-5">
+          {/* <div className="flex gap-5">
             {[
               { label: "Privacy", href: "/privacy" },
               { label: "Terms", href: "/terms" },
@@ -222,7 +222,7 @@ export function Footer() {
                 {link.label}
               </Link>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 
