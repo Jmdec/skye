@@ -44,13 +44,6 @@ const EMPTY_ADDRESS: Address = {
 
 const PAYMENT_METHODS = [
   {
-    value: "cod",
-    label: "Cash on Delivery",
-    icon: "💵",
-    description: null,
-    upcoming: false,
-  },
-  {
     value: "card",
     label: "Credit / Debit Card",
     icon: "💳",
@@ -150,8 +143,8 @@ export function CheckoutForm() {
     ...EMPTY_ADDRESS,
   });
   const [paymentMethod, setPaymentMethod] = useState<
-    "cod" | "card" | "gcash" | "afterpay"
-  >("cod");
+    "card" | "gcash" | "afterpay"
+  >("afterpay");
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
