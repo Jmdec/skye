@@ -52,7 +52,7 @@ export default function PressPage() {
               </h1>
             </div>
             <a
-              href="mailto:press@skye-avenue.com.au"
+              href="mailto:hannahmontero@skye-avenue.com.au"
               className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-xl font-medium hover:bg-foreground/90 transition-colors text-sm shrink-0"
             >
               <Mail className="w-4 h-4" />
@@ -92,7 +92,7 @@ export default function PressPage() {
                 { term: "Based in", def: "Australia" },
                 { term: "Ships to", def: "Australia & select international" },
                 { term: "Brands stocked", def: "40+" },
-                { term: "Press contact", def: "press@skye-avenue.com.au" },
+                { term: "Press contact", def: "hannahmontero@skye-avenue.com.au" },
               ].map(({ term, def }) => (
                 <div
                   key={term}

@@ -129,7 +129,7 @@ export default function CareersPage() {
                   </div>
                 </div>
                 <a
-                  href={`mailto:careers@skye-avenue.com.au?subject=Application: ${role.title}`}
+                  href={`mailto:hannahmontero@skye-avenue.com.au?subject=Application: ${role.title}`}
                   className="inline-flex items-center gap-2 bg-foreground text-background text-sm font-medium px-5 py-2.5 rounded-xl hover:bg-foreground/90 transition-colors shrink-0"
                 >
                   Apply now <ArrowRight className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ export default function CareersPage() {
             </p>
           </div>
           <a
-            href="mailto:careers@skye-avenue.com.au?subject=Speculative application"
+            href="mailto:hannah@skye-avenue.com.au?subject=Speculative application"
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-7 py-3.5 rounded-xl font-medium hover:bg-primary/90 transition-colors shrink-0 text-sm"
           >
             Say hello <ArrowRight className="w-4 h-4" />

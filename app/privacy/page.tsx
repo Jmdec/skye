@@ -54,7 +54,7 @@ You can disable cookies in your browser settings, but some features (such as the
   {
     id: "retention",
     title: "5. Data Retention",
-    content: `We retain your personal data for as long as necessary to provide our services and meet legal obligations. Order records are kept for a minimum of 7 years for taxation and compliance purposes. You may request deletion of your account and associated data at any time (subject to legal retention requirements) by contacting us at privacy@skye-avenue.com.au.`,
+    content: `We retain your personal data for as long as necessary to provide our services and meet legal obligations. Order records are kept for a minimum of 7 years for taxation and compliance purposes. You may request deletion of your account and associated data at any time (subject to legal retention requirements) by contacting us at hannahmontero@skye-avenue.com.au.`,
   },
   {
     id: "rights",
@@ -66,7 +66,7 @@ You can disable cookies in your browser settings, but some features (such as the
 - **Request deletion** of your data (where not legally required to retain it)
 - **Opt out** of marketing communications at any time via the unsubscribe link in any email
 
-To exercise any of these rights, contact us at privacy@skye-avenue.com.au. We will respond within 30 days.`,
+To exercise any of these rights, contact us at hannahmontero@skye-avenue.com.au. We will respond within 30 days.`,
   },
   {
     id: "security",
@@ -86,7 +86,7 @@ To exercise any of these rights, contact us at privacy@skye-avenue.com.au. We wi
   {
     id: "contact",
     title: "10. Contact Us",
-    content: `If you have any questions or concerns about this Privacy Policy or how we handle your data, please contact us:\n\n**Email:** privacy@skye-avenue.com.au\n**Mailing address:** SkyeAvenue, Australia\n\nYou may also lodge a complaint with the Office of the Australian Information Commissioner (OAIC) at www.oaic.gov.au if you believe your privacy rights have been breached.`,
+    content: `If you have any questions or concerns about this Privacy Policy or how we handle your data, please contact us:\n\n**Email:** hannahmontero@skye-avenue.com.au\n**Mailing address:** SkyeAvenue, Australia\n\nYou may also lodge a complaint with the Office of the Australian Information Commissioner (OAIC) at www.oaic.gov.au if you believe your privacy rights have been breached.`,
   },
 ];
 

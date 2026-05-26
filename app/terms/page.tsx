@@ -82,7 +82,7 @@ Nothing in these Terms limits your rights under the Australian Consumer Law.`,
   {
     id: "contact",
     title: "11. Contact",
-    content: `For any questions about these Terms, please contact us:\n\n**Email:** hello@skye-avenue.com.au`,
+    content: `For any questions about these Terms, please contact us:\n\n**Email:** hannahmontero@skye-avenue.com.au`,
   },
 ];
 

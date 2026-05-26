@@ -41,7 +41,7 @@ export default function ShippingPage() {
                   </h3>
                   <div className="space-y-2 text-sm text-foreground/70">
                     <p>Standard Delivery: AUD $12 (5-7 business days)</p>
-                    <p>Free Shipping on orders over AUD $100</p>
+                    {/* <p>Free Shipping on orders over AUD $100</p> */}
                     <p>Express Delivery: AUD $25 (2-3 business days)</p>
                   </div>
                 </div>
@@ -81,7 +81,7 @@ export default function ShippingPage() {
                     Step 1: Contact Us
                   </h4>
                   <p className="text-sm text-foreground/70">
-                    Email us at hello@skyeavenue.com.au with your order number
+                    Email us at hannahmontero@skyeavenue.com.au with your order number
                     and reason for return
                   </p>
                 </div>
