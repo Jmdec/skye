@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Loader2, AlertCircle, ShoppingBag, Lock } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  Loader2,
+  AlertCircle,
+  ShoppingBag,
+  Lock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-store";
 
@@ -18,22 +25,38 @@ interface AuthUser {
 }
 
 interface Address {
-  line1:   string;
-  line2:   string;
-  city:    string;
-  state:   string;
-  zip:     string;
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  zip: string;
   country: string;
 }
 
 const EMPTY_ADDRESS: Address = {
-  line1: "", line2: "", city: "", state: "", zip: "", country: "",
+  line1: "",
+  line2: "",
+  city: "",
+  state: "",
+  zip: "",
+  country: "",
 };
 
 const PAYMENT_METHODS = [
-  { value: "cod",   label: "Cash on Delivery" },
-  { value: "card",  label: "Credit / Debit Card" },
-  { value: "gcash", label: "GCash" },
+  { value: "cod", label: "Cash on Delivery", icon: "💵", description: null },
+  {
+    value: "card",
+    label: "Credit / Debit Card",
+    icon: "💳",
+    description: null,
+  },
+  { value: "gcash", label: "GCash", icon: "📱", description: null },
+  {
+    value: "afterpay",
+    label: "Afterpay",
+    icon: null,
+    description: "Pay in 4 interest-free installments",
+  },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -44,9 +67,15 @@ const iCls = (err?: string, locked?: boolean) =>
   }`;
 
 function Field({
-  label, error, locked, children,
+  label,
+  error,
+  locked,
+  children,
 }: {
-  label: string; error?: string; locked?: boolean; children: React.ReactNode;
+  label: string;
+  error?: string;
+  locked?: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <div>
@@ -65,6 +94,30 @@ function Field({
   );
 }
 
+function AfterpayLogo({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 28"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="120" height="28" rx="4" fill="#B2FCE4" />
+      <text
+        x="60"
+        y="19"
+        textAnchor="middle"
+        fontFamily="Arial Black, sans-serif"
+        fontWeight="900"
+        fontSize="13"
+        fill="#000000"
+      >
+        afterpay
+      </text>
+    </svg>
+  );
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export function CheckoutForm() {
@@ -72,21 +125,25 @@ export function CheckoutForm() {
   const { items, getTotalPrice, clearCart } = useCart();
 
   const subtotal = getTotalPrice();
-  const total    = subtotal;
+  const total = subtotal;
 
-  const [authUser,      setAuthUser]      = useState<AuthUser | null>(null);
-  const [authLoading,   setAuthLoading]   = useState(true);
-  const [customerName,  setCustomerName]  = useState("");
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [shippingAddr,  setShippingAddr]  = useState<Address>({ ...EMPTY_ADDRESS });
-  const [paymentMethod, setPaymentMethod] = useState<"cod" | "card" | "gcash">("cod");
-  const [notes,         setNotes]         = useState("");
-  const [errors,        setErrors]        = useState<Record<string, string>>({});
-  const [submitting,    setSubmitting]    = useState(false);
-  const [success,       setSuccess]       = useState(false);
-  const [orderNumber,   setOrderNumber]   = useState("");
-  const [lastAddress,   setLastAddress]   = useState(false);
+  const [shippingAddr, setShippingAddr] = useState<Address>({
+    ...EMPTY_ADDRESS,
+  });
+  const [paymentMethod, setPaymentMethod] = useState<
+    "cod" | "card" | "gcash" | "afterpay"
+  >("cod");
+  const [notes, setNotes] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
+  const [lastAddress, setLastAddress] = useState(false);
 
   // ── Fetch logged-in user & last address ──────────────────────────────────
   useEffect(() => {
@@ -102,7 +159,6 @@ export function CheckoutForm() {
         setCustomerEmail(user.email ?? "");
         setCustomerPhone(user.phone_number ?? "");
 
-        // Fetch last used shipping address from order history
         const ordersRes = await fetch("/api/orders/my");
         if (ordersRes.ok) {
           const ordersData = await ordersRes.json();
@@ -110,11 +166,11 @@ export function CheckoutForm() {
           if (lastOrder?.shipping_address) {
             const addr = lastOrder.shipping_address;
             setShippingAddr({
-              line1:   addr.line1   ?? user.full_address ?? "",
-              line2:   addr.line2   ?? "",
-              city:    addr.city    ?? "",
-              state:   addr.state   ?? "",
-              zip:     addr.zip     ?? "",
+              line1: addr.line1 ?? user.full_address ?? "",
+              line2: addr.line2 ?? "",
+              city: addr.city ?? "",
+              state: addr.state ?? "",
+              zip: addr.zip ?? "",
               country: addr.country ?? "",
             });
             setLastAddress(true);
@@ -125,7 +181,7 @@ export function CheckoutForm() {
           setShippingAddr((prev) => ({ ...prev, line1: user.full_address! }));
         }
       } catch {
-        // guest — form stays empty
+        // guest
       } finally {
         setAuthLoading(false);
       }
@@ -142,14 +198,16 @@ export function CheckoutForm() {
   // ── Validation ────────────────────────────────────────────────────────────
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!customerName.trim())         e.customerName                = "Required";
-    if (!customerEmail.trim())        e.customerEmail               = "Required";
-    else if (!/\S+@\S+\.\S+/.test(customerEmail)) e.customerEmail  = "Invalid email";
-    if (!shippingAddr.line1.trim())   e["shipping_address.line1"]   = "Required";
-    if (!shippingAddr.city.trim())    e["shipping_address.city"]    = "Required";
-    if (!shippingAddr.zip.trim())     e["shipping_address.zip"]     = "Required";
-    if (!shippingAddr.country.trim()) e["shipping_address.country"] = "Required";
-    if (items.length === 0)           e._global                     = "Your cart is empty.";
+    if (!customerName.trim()) e.customerName = "Required";
+    if (!customerEmail.trim()) e.customerEmail = "Required";
+    else if (!/\S+@\S+\.\S+/.test(customerEmail))
+      e.customerEmail = "Invalid email";
+    if (!shippingAddr.line1.trim()) e["shipping_address.line1"] = "Required";
+    if (!shippingAddr.city.trim()) e["shipping_address.city"] = "Required";
+    if (!shippingAddr.zip.trim()) e["shipping_address.zip"] = "Required";
+    if (!shippingAddr.country.trim())
+      e["shipping_address.country"] = "Required";
+    if (items.length === 0) e._global = "Your cart is empty.";
     return e;
   };
 
@@ -157,35 +215,45 @@ export function CheckoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
 
     setSubmitting(true);
     setErrors({});
 
     try {
       const payload = {
-        customer_name:         customerName.trim(),
-        customer_email:        customerEmail.trim(),
+        customer_name: customerName.trim(),
+        customer_email: customerEmail.trim(),
         customer_phone_number: customerPhone.trim() || undefined,
         shipping_address: {
-          line1:   shippingAddr.line1.trim(),
-          line2:   shippingAddr.line2.trim() || undefined,
-          city:    shippingAddr.city.trim(),
-          state:   shippingAddr.state.trim() || undefined,
-          zip:     shippingAddr.zip.trim(),
+          line1: shippingAddr.line1.trim(),
+          line2: shippingAddr.line2.trim() || undefined,
+          city: shippingAddr.city.trim(),
+          state: shippingAddr.state.trim() || undefined,
+          zip: shippingAddr.zip.trim(),
           country: shippingAddr.country.trim(),
         },
         payment_method: paymentMethod,
         notes: notes.trim() || undefined,
+        // ── FIXED: include price and name so Afterpay route can use them ──
         items: items.map((item) => ({
           product_id: Number(item.id),
-          qty:        item.quantity,
+          qty: item.quantity,
+          price: item.price, // ← required for Afterpay total & line items
+          name: item.name, // ← required for Afterpay line item names
         })),
       };
 
       const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify(payload),
       });
 
@@ -195,7 +263,9 @@ export function CheckoutForm() {
         if (json.errors) {
           const mapped: Record<string, string> = {};
           Object.entries(json.errors as Record<string, string[]>).forEach(
-            ([k, v]) => { mapped[k] = Array.isArray(v) ? v[0] : (v as string); },
+            ([k, v]) => {
+              mapped[k] = Array.isArray(v) ? v[0] : (v as string);
+            },
           );
           setErrors(mapped);
         } else {
@@ -204,6 +274,21 @@ export function CheckoutForm() {
         return;
       }
 
+      // ── Afterpay: redirect to their hosted payment page ──────────────────
+      if (paymentMethod === "afterpay") {
+        if (json.data?.afterpay_redirect_url) {
+          clearCart();
+          window.location.href = json.data.afterpay_redirect_url;
+        } else {
+          setErrors({
+            _global:
+              "Could not initiate Afterpay. Please try another payment method.",
+          });
+        }
+        return;
+      }
+
+      // ── All other methods: show success screen ───────────────────────────
       clearCart();
       setOrderNumber(json.data.order_number);
       setSuccess(true);
@@ -215,6 +300,8 @@ export function CheckoutForm() {
     }
   };
 
+  const installmentAmount = (total / 4).toFixed(2);
+
   // ── Success screen ────────────────────────────────────────────────────────
   if (success) {
     return (
@@ -223,9 +310,15 @@ export function CheckoutForm() {
           <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">
             <Check className="w-8 h-8 text-emerald-600" />
           </div>
-          <h2 className="font-serif text-3xl font-semibold text-foreground mb-2">Order Placed!</h2>
-          <p className="text-foreground/60 mb-2">Thank you for shopping with Skye Avenue.</p>
-          <p className="text-sm font-semibold text-pink-500 mb-8">Order #{orderNumber}</p>
+          <h2 className="font-serif text-3xl font-semibold text-foreground mb-2">
+            Order Placed!
+          </h2>
+          <p className="text-foreground/60 mb-2">
+            Thank you for shopping with Skye Avenue.
+          </p>
+          <p className="text-sm font-semibold text-pink-500 mb-8">
+            Order #{orderNumber}
+          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/products">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md h-11 px-6">
@@ -233,7 +326,10 @@ export function CheckoutForm() {
               </Button>
             </Link>
             <Link href="/orders">
-              <Button variant="outline" className="border-pink-200 hover:bg-pink-50 rounded-md h-11 px-6">
+              <Button
+                variant="outline"
+                className="border-pink-200 hover:bg-pink-50 rounded-md h-11 px-6"
+              >
                 <ShoppingBag className="w-4 h-4 mr-2" /> My Orders
               </Button>
             </Link>
@@ -249,7 +345,10 @@ export function CheckoutForm() {
       <section className="py-8 sm:py-12">
         <div className="container mx-auto px-4 max-w-2xl space-y-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-pink-50 rounded-2xl animate-pulse" />
+            <div
+              key={i}
+              className="h-24 bg-pink-50 rounded-2xl animate-pulse"
+            />
           ))}
         </div>
       </section>
@@ -262,10 +361,8 @@ export function CheckoutForm() {
       <div className="container mx-auto px-4">
         <form onSubmit={handleSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
             {/* ── Left: form fields ─────────────────────────────────────── */}
             <div className="lg:col-span-2 space-y-8">
-
               {/* Global error */}
               {errors._global && (
                 <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl text-sm text-red-500">
@@ -278,7 +375,8 @@ export function CheckoutForm() {
               {authUser && (
                 <div className="flex items-center gap-2 p-4 bg-pink-50 border border-pink-100 rounded-2xl text-sm text-pink-600">
                   <Lock className="w-4 h-4 shrink-0" />
-                  Signed in as <span className="font-semibold ml-1">{authUser.email}</span>
+                  Signed in as{" "}
+                  <span className="font-semibold ml-1">{authUser.email}</span>
                   {lastAddress && (
                     <span className="ml-auto text-pink-400 text-xs">
                       Last address prefilled
@@ -289,22 +387,36 @@ export function CheckoutForm() {
 
               {/* Contact */}
               <div className="bg-white border border-pink-100 rounded-2xl p-6 space-y-4">
-                <h3 className="font-serif text-lg text-foreground mb-2">Contact Information</h3>
+                <h3 className="font-serif text-lg text-foreground mb-2">
+                  Contact Information
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Full Name" error={errors.customerName} locked={isLocked}>
+                  <Field
+                    label="Full Name"
+                    error={errors.customerName}
+                    locked={isLocked}
+                  >
                     <input
                       value={customerName}
-                      onChange={(e) => !isLocked && setCustomerName(e.target.value)}
+                      onChange={(e) =>
+                        !isLocked && setCustomerName(e.target.value)
+                      }
                       readOnly={isLocked}
                       placeholder="Jane Smith"
                       className={iCls(errors.customerName, isLocked)}
                     />
                   </Field>
-                  <Field label="Email" error={errors.customerEmail} locked={isLocked}>
+                  <Field
+                    label="Email"
+                    error={errors.customerEmail}
+                    locked={isLocked}
+                  >
                     <input
                       type="email"
                       value={customerEmail}
-                      onChange={(e) => !isLocked && setCustomerEmail(e.target.value)}
+                      onChange={(e) =>
+                        !isLocked && setCustomerEmail(e.target.value)
+                      }
                       readOnly={isLocked}
                       placeholder="jane@example.com"
                       className={iCls(errors.customerEmail, isLocked)}
@@ -315,7 +427,9 @@ export function CheckoutForm() {
                   <input
                     type="tel"
                     value={customerPhone}
-                    onChange={(e) => !isLocked && setCustomerPhone(e.target.value)}
+                    onChange={(e) =>
+                      !isLocked && setCustomerPhone(e.target.value)
+                    }
                     readOnly={isLocked}
                     placeholder="+63 9XX XXX XXXX"
                     className={iCls(undefined, isLocked)}
@@ -325,8 +439,13 @@ export function CheckoutForm() {
 
               {/* Shipping Address */}
               <div className="bg-white border border-pink-100 rounded-2xl p-6 space-y-4">
-                <h3 className="font-serif text-lg text-foreground mb-2">Shipping Address</h3>
-                <Field label="Address Line 1" error={errors["shipping_address.line1"]}>
+                <h3 className="font-serif text-lg text-foreground mb-2">
+                  Shipping Address
+                </h3>
+                <Field
+                  label="Address Line 1"
+                  error={errors["shipping_address.line1"]}
+                >
                   <input
                     value={shippingAddr.line1}
                     onChange={(e) => setAddr("line1", e.target.value)}
@@ -361,7 +480,10 @@ export function CheckoutForm() {
                   </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="ZIP / Postal Code" error={errors["shipping_address.zip"]}>
+                  <Field
+                    label="ZIP / Postal Code"
+                    error={errors["shipping_address.zip"]}
+                  >
                     <input
                       value={shippingAddr.zip}
                       onChange={(e) => setAddr("zip", e.target.value)}
@@ -369,7 +491,10 @@ export function CheckoutForm() {
                       className={iCls(errors["shipping_address.zip"])}
                     />
                   </Field>
-                  <Field label="Country" error={errors["shipping_address.country"]}>
+                  <Field
+                    label="Country"
+                    error={errors["shipping_address.country"]}
+                  >
                     <input
                       value={shippingAddr.country}
                       onChange={(e) => setAddr("country", e.target.value)}
@@ -382,7 +507,9 @@ export function CheckoutForm() {
 
               {/* Payment Method */}
               <div className="bg-white border border-pink-100 rounded-2xl p-6 space-y-3">
-                <h3 className="font-serif text-lg text-foreground mb-2">Payment Method</h3>
+                <h3 className="font-serif text-lg text-foreground mb-2">
+                  Payment Method
+                </h3>
                 {PAYMENT_METHODS.map((pm) => (
                   <label
                     key={pm.value}
@@ -397,17 +524,64 @@ export function CheckoutForm() {
                       name="payment_method"
                       value={pm.value}
                       checked={paymentMethod === pm.value}
-                      onChange={() => setPaymentMethod(pm.value as typeof paymentMethod)}
+                      onChange={() =>
+                        setPaymentMethod(pm.value as typeof paymentMethod)
+                      }
                       className="accent-pink-500"
                     />
-                    <span className="text-sm text-foreground font-medium">{pm.label}</span>
+                    <span className="flex items-center gap-2 flex-1">
+                      {pm.icon && <span className="text-base">{pm.icon}</span>}
+                      {pm.value === "afterpay" && (
+                        <AfterpayLogo className="h-5 w-auto" />
+                      )}
+                      <span className="text-sm text-foreground font-medium">
+                        {pm.label}
+                      </span>
+                      {pm.description && (
+                        <span className="ml-auto text-xs text-foreground/40">
+                          {pm.description}
+                        </span>
+                      )}
+                    </span>
                   </label>
                 ))}
+
+                {paymentMethod === "afterpay" && total > 0 && (
+                  <div className="mt-2 p-3.5 bg-[#B2FCE4]/20 border border-[#B2FCE4] rounded-xl">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">
+                      Pay in 4 interest-free installments of{" "}
+                      <span className="text-gray-900">
+                        ${installmentAmount}
+                      </span>
+                    </p>
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4].map((n) => (
+                        <div key={n} className="flex-1 text-center">
+                          <div
+                            className={`h-1.5 rounded-full mb-1 ${n === 1 ? "bg-gray-800" : "bg-gray-200"}`}
+                          />
+                          <p className="text-[10px] text-gray-500">
+                            {n === 1 ? "Today" : `Week ${(n - 1) * 2}`}
+                          </p>
+                          <p className="text-[10px] font-semibold text-gray-700">
+                            ${installmentAmount}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-2">
+                      You&apos;ll be redirected to Afterpay to complete your
+                      payment. No interest, no fees when you pay on time.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Notes */}
               <div className="bg-white border border-pink-100 rounded-2xl p-6">
-                <h3 className="font-serif text-lg text-foreground mb-4">Order Notes</h3>
+                <h3 className="font-serif text-lg text-foreground mb-4">
+                  Order Notes
+                </h3>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
@@ -421,15 +595,18 @@ export function CheckoutForm() {
             {/* ── Right: order summary ──────────────────────────────────── */}
             <div className="lg:col-span-1">
               <div className="bg-card border border-border rounded-2xl p-6 sticky top-24 space-y-4">
-                <h2 className="font-serif text-xl font-semibold text-foreground">Order Summary</h2>
+                <h2 className="font-serif text-xl font-semibold text-foreground">
+                  Order Summary
+                </h2>
 
-                {/* Line items */}
                 <div className="space-y-3 pb-4 border-b border-border">
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span className="text-foreground/70 truncate max-w-[160px]">
                         {item.name}{" "}
-                        <span className="text-foreground/40">×{item.quantity}</span>
+                        <span className="text-foreground/40">
+                          ×{item.quantity}
+                        </span>
                       </span>
                       <span className="font-medium text-foreground">
                         ${(item.price * item.quantity).toFixed(2)}
@@ -438,7 +615,6 @@ export function CheckoutForm() {
                   ))}
                 </div>
 
-                {/* Total */}
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-foreground">Total</span>
                   <span className="font-serif text-2xl font-semibold text-foreground">
@@ -446,23 +622,44 @@ export function CheckoutForm() {
                   </span>
                 </div>
 
+                {paymentMethod === "afterpay" && total > 0 && (
+                  <div className="flex items-center gap-2 p-2.5 bg-[#B2FCE4]/20 rounded-lg border border-[#B2FCE4]/60">
+                    <AfterpayLogo className="h-4 w-auto" />
+                    <span className="text-xs text-gray-600">
+                      4 × <strong>${installmentAmount}</strong>
+                    </span>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   disabled={submitting || items.length === 0}
                   className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-md h-12 font-semibold"
                 >
                   {submitting ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Placing Order…</>
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      {paymentMethod === "afterpay"
+                        ? "Redirecting to Afterpay…"
+                        : "Placing Order…"}
+                    </>
                   ) : (
-                    <>Place Order <ArrowRight className="w-4 h-4 ml-2" /></>
+                    <>
+                      {paymentMethod === "afterpay"
+                        ? "Continue to Afterpay"
+                        : "Place Order"}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
                   )}
                 </Button>
 
-                {/* Guest nudge */}
                 {!authUser && (
                   <p className="text-xs text-center text-foreground/50">
                     Have an account?{" "}
-                    <Link href="/login" className="text-pink-500 hover:underline font-medium">
+                    <Link
+                      href="/login"
+                      className="text-pink-500 hover:underline font-medium"
+                    >
                       Sign in
                     </Link>{" "}
                     to autofill your details.
@@ -470,7 +667,6 @@ export function CheckoutForm() {
                 )}
               </div>
             </div>
-
           </div>
         </form>
       </div>
