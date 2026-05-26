@@ -43,19 +43,33 @@ const EMPTY_ADDRESS: Address = {
 };
 
 const PAYMENT_METHODS = [
-  { value: "cod", label: "Cash on Delivery", icon: "💵", description: null },
+  {
+    value: "cod",
+    label: "Cash on Delivery",
+    icon: "💵",
+    description: null,
+    upcoming: false,
+  },
   {
     value: "card",
     label: "Credit / Debit Card",
     icon: "💳",
     description: null,
+    upcoming: true,
   },
-  { value: "gcash", label: "GCash", icon: "📱", description: null },
+  {
+    value: "gcash",
+    label: "GCash",
+    icon: "📱",
+    description: null,
+    upcoming: true,
+  },
   {
     value: "afterpay",
     label: "Afterpay",
     icon: null,
     description: "Pay in 4 interest-free installments",
+    upcoming: false,
   },
 ];
 
@@ -239,12 +253,11 @@ export function CheckoutForm() {
         },
         payment_method: paymentMethod,
         notes: notes.trim() || undefined,
-        // ── FIXED: include price and name so Afterpay route can use them ──
         items: items.map((item) => ({
           product_id: Number(item.id),
           qty: item.quantity,
-          price: item.price, // ← required for Afterpay total & line items
-          name: item.name, // ← required for Afterpay line item names
+          price: item.price,
+          name: item.name,
         })),
       };
 
@@ -510,13 +523,16 @@ export function CheckoutForm() {
                 <h3 className="font-serif text-lg text-foreground mb-2">
                   Payment Method
                 </h3>
+
                 {PAYMENT_METHODS.map((pm) => (
                   <label
                     key={pm.value}
-                    className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${
-                      paymentMethod === pm.value
-                        ? "border-pink-400 bg-pink-50/60"
-                        : "border-pink-100 hover:border-pink-200"
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all ${
+                      pm.upcoming
+                        ? "border-pink-50 bg-gray-50/50 cursor-not-allowed opacity-60"
+                        : paymentMethod === pm.value
+                          ? "border-pink-400 bg-pink-50/60 cursor-pointer"
+                          : "border-pink-100 hover:border-pink-200 cursor-pointer"
                     }`}
                   >
                     <input
@@ -525,8 +541,10 @@ export function CheckoutForm() {
                       value={pm.value}
                       checked={paymentMethod === pm.value}
                       onChange={() =>
+                        !pm.upcoming &&
                         setPaymentMethod(pm.value as typeof paymentMethod)
                       }
+                      disabled={pm.upcoming}
                       className="accent-pink-500"
                     />
                     <span className="flex items-center gap-2 flex-1">
@@ -537,15 +555,20 @@ export function CheckoutForm() {
                       <span className="text-sm text-foreground font-medium">
                         {pm.label}
                       </span>
-                      {pm.description && (
+                      {pm.upcoming ? (
+                        <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider bg-pink-100 text-pink-400 px-2 py-0.5 rounded-full">
+                          Coming Soon
+                        </span>
+                      ) : pm.description ? (
                         <span className="ml-auto text-xs text-foreground/40">
                           {pm.description}
                         </span>
-                      )}
+                      ) : null}
                     </span>
                   </label>
                 ))}
 
+                {/* Afterpay installment breakdown */}
                 {paymentMethod === "afterpay" && total > 0 && (
                   <div className="mt-2 p-3.5 bg-[#B2FCE4]/20 border border-[#B2FCE4] rounded-xl">
                     <p className="text-xs font-semibold text-gray-700 mb-2">
