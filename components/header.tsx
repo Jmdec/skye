@@ -40,13 +40,6 @@ const announcements = [
       </svg>
     ),
   },
-  {
-    id: 2,
-    text: "Free shipping on orders over",
-    highlight: "$75",
-    suffix: "",
-    icon: null,
-  },
 ];
 
 function AnnouncementBanner() {
