@@ -239,13 +239,10 @@ export default function AboutPage() {
               }}
             >
               <p>
-                Skye Avenue started as a personal pursuit — the search for
-                products that truly deliver. What began as a private collection
-                became a curated marketplace for women who refuse to settle.
+                At Skye Avenue we bring latest Asia`s trends, viral skincare products from Thailand and  the Philippines ad fashionable accessories to Australia.
               </p>
               <p style={{ marginTop: "12px" }}>
-                We believe beauty is about feeling confident, not just looking
-                it. Every product we carry reflects that belief.
+                Our Mission is to make trendy, affortable, and confidence boosting style accessible to everyone.
               </p>
             </div>
           </div>

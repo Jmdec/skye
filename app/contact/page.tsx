@@ -76,14 +76,14 @@ export default function ContactPage() {
     {
       icon: "✉",
       label: "Email",
-      value: "hello@skyeavenue.com.au",
-      href: "mailto:hello@skyeavenue.com.au",
+      value: "hannahmontero@skye-avenue.com.au",
+      href: "mailto:hannahmontero@skye-avenue.com.au",
     },
     {
       icon: "☎",
       label: "Phone",
-      value: "+61 (0)2 9876 5432",
-      href: "tel:+61298765432",
+      value: "046603755",
+      href: "tel:046603755",
     },
     { icon: "⌖", label: "Location", value: "Sydney, Australia", href: null },
   ];

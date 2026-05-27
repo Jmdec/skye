@@ -296,7 +296,7 @@ export function HeroSection() {
         {/* ── Brand badge top-left ── */}
         <div className="absolute top-6 left-6 sm:left-12 lg:left-20">
           <span className="text-white/80 text-xs uppercase tracking-[0.3em] font-medium">
-            Premium Australian Beauty
+            Fashion*Beauty*Wellness and more
           </span>
         </div>
       </div>
