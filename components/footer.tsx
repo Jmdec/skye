@@ -125,8 +125,7 @@ export function Footer() {
               </h2>
             </div>
             <p className="text-sm text-pink-200/70 font-light max-w-xs lg:text-right leading-relaxed">
-              Premium Australian beauty and skincare products, thoughtfully
-              curated for the modern woman.
+                At Skye Avenue we bring latest Asia`s trends, viral skincare products from Thailand and  the Philippines ad fashionable accessories to Australia.                 Our Mission is to make trendy, affortable, and confidence boosting style accessible to everyone.
             </p>
           </div>
         </div>
