@@ -11,6 +11,7 @@ import {
   Check,
   Star,
   ChevronDown,
+  ChevronRight,
   Minus,
   Sparkles,
   TrendingUp,
@@ -22,7 +23,6 @@ import {
   DollarSign,
   Package,
   ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { DataTable } from "@/components/admin/data-table";
 import { useToast } from "@/hooks/use-toast";
@@ -86,24 +86,138 @@ function toFrontend(b: BackendProduct): Product {
   };
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
+// ── Categories (Grouped) ──────────────────────────────────────────────────────
 
-const CATEGORY_SUGGESTIONS = [
-  "Skincare", "Fragrance", "Wellness", "Makeup", "Foundation",
-  "Lip Color", "Eye Shadow", "Blush & Bronzer", "Mascara", "Concealer",
-  "Primer", "Setting Spray", "Eyebrow", "Highlighter", "Contour",
-  "Nail Care", "Hair Care", "Shampoo", "Conditioner", "Hair Mask",
-  "Hair Oil", "Hair Serum", "Body Care", "Body Lotion", "Body Scrub",
-  "Body Oil", "Hand Cream", "Foot Care", "Sun Care", "SPF / Sunscreen",
-  "After Sun", "Self Tanner", "Cleanser", "Toner", "Serum",
-  "Moisturizer", "Eye Cream", "Face Mask", "Face Oil", "Exfoliator",
-  "Lip Care", "Lip Balm", "Lip Scrub", "Perfume", "Eau de Toilette",
-  "Body Mist", "Candle", "Bath & Body", "Bath Salts", "Bubble Bath",
-  "Shower Gel", "Intimate Care", "Tools & Brushes", "Facial Roller",
-  "Gua Sha", "Makeup Remover", "Micellar Water", "Sheet Mask",
-  "Pore Strips", "Vitamins & Supplements", "Collagen", "Probiotics",
-  "Gift Sets",
-];
+const CATEGORIES: Record<string, string[]> = {
+  "Beauty & Skincare": [
+    "Cleanser",
+    "Toner",
+    "Serum",
+    "Moisturizer",
+    "Eye Cream",
+    "Face Mask",
+    "Sheet Mask",
+    "Face Oil",
+    "Exfoliator",
+    "Pore Strips",
+    "Primer",
+    "Setting Spray",
+    "Micellar Water",
+    "Makeup Remover",
+  ],
+  Makeup: [
+    "Foundation",
+    "Concealer",
+    "Blush & Bronzer",
+    "Contour",
+    "Highlighter",
+    "Eye Shadow",
+    "Mascara",
+    "Eyebrow",
+    "Lip Color",
+    "Lip Balm",
+    "Lip Scrub",
+    "Nail Care",
+  ],
+  Fragrance: ["Perfume", "Eau de Toilette", "Body Mist", "Candle"],
+  "Hair Care": [
+    "Shampoo",
+    "Conditioner",
+    "Hair Mask",
+    "Hair Oil",
+    "Hair Serum",
+  ],
+  "Body Care": [
+    "Body Lotion",
+    "Body Scrub",
+    "Body Oil",
+    "Hand Cream",
+    "Foot Care",
+    "Shower Gel",
+    "Bath Salts",
+    "Bubble Bath",
+    "Intimate Care",
+  ],
+  "Sun Care": ["SPF / Sunscreen", "After Sun", "Self Tanner"],
+  Wellness: ["Vitamins & Supplements", "Collagen", "Probiotics"],
+  "Tools & Accessories": ["Tools & Brushes", "Facial Roller", "Gua Sha"],
+  "Apparel — Tops": [
+    "T-Shirts",
+    "Blouses",
+    "Shirts",
+    "Tank Tops",
+    "Crop Tops",
+    "Sweaters",
+    "Hoodies",
+    "Cardigans",
+    "Polo Shirts",
+  ],
+  "Apparel — Bottoms": [
+    "Jeans",
+    "Trousers",
+    "Shorts",
+    "Skirts",
+    "Leggings",
+    "Joggers",
+    "Culottes",
+  ],
+  "Apparel — Dresses & Suits": [
+    "Casual Dresses",
+    "Formal Dresses",
+    "Jumpsuits",
+    "Rompers",
+    "Blazers",
+    "Suits",
+    "Co-ords",
+  ],
+  "Apparel — Outerwear": [
+    "Jackets",
+    "Coats",
+    "Parkas",
+    "Windbreakers",
+    "Vests",
+  ],
+  "Apparel — Footwear": [
+    "Sneakers",
+    "Heels",
+    "Sandals",
+    "Boots",
+    "Loafers",
+    "Flats",
+    "Slip-ons",
+  ],
+  "Apparel — Bags": [
+    "Handbags",
+    "Tote Bags",
+    "Backpacks",
+    "Clutches",
+    "Crossbody Bags",
+    "Wallets",
+  ],
+  "Apparel — Accessories": [
+    "Scarves",
+    "Belts",
+    "Hats & Caps",
+    "Sunglasses",
+    "Jewelry",
+    "Watches",
+    "Socks",
+    "Hair Accessories",
+  ],
+  "Apparel — Activewear": [
+    "Sports Bras",
+    "Athletic Tops",
+    "Athletic Shorts",
+    "Yoga Pants",
+    "Compression Wear",
+    "Swimwear",
+  ],
+  "Apparel — Intimates": ["Bras", "Underwear", "Sleepwear", "Loungewear"],
+  Gifting: ["Gift Sets"],
+};
+
+// Flat list of all subcategories for search
+const ALL_SUBCATEGORIES: string[] = Object.values(CATEGORIES).flat();
 
 const CAT_COLORS: Record<string, string> = {
   skincare: "#f9a8c9",
@@ -114,10 +228,17 @@ const CAT_COLORS: Record<string, string> = {
   "body care": "#fed7aa",
   "sun care": "#fcd34d",
   "nail care": "#f0abfc",
+  apparel: "#a5f3fc",
 };
-const catColor = (c: string) => CAT_COLORS[c.toLowerCase()] ?? "#e9d5ff";
+const catColor = (c: string) => {
+  const lower = c.toLowerCase();
+  for (const [key, val] of Object.entries(CAT_COLORS)) {
+    if (lower.includes(key)) return val;
+  }
+  return "#e9d5ff";
+};
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── CategoryCombobox (two-level grouped accordion) ────────────────────────────
 
 function CategoryCombobox({
   value,
@@ -130,58 +251,178 @@ function CategoryCombobox({
 }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(value);
-  const filtered = q.trim()
-    ? CATEGORY_SUGGESTIONS.filter((s) =>
-        s.toLowerCase().includes(q.toLowerCase()),
-      )
-    : CATEGORY_SUGGESTIONS;
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const isSearching = q.trim().length > 0 && q !== value;
+
+  // Filtered subcategories for search mode
+  const searchResults = isSearching
+    ? ALL_SUBCATEGORIES.filter((s) => s.toLowerCase().includes(q.toLowerCase()))
+    : [];
+
+  const toggleGroup = (group: string) => {
+    setExpanded((prev) => ({ ...prev, [group]: !prev[group] }));
+  };
+
+  const select = (sub: string) => {
+    setQ(sub);
+    onChange(sub);
+    setOpen(false);
+  };
+
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
+      {/* Input */}
       <div className="relative">
         <input
           value={q}
           onChange={(e) => {
             setQ(e.target.value);
-            onChange(e.target.value);
+            if (e.target.value !== value) onChange(e.target.value);
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="e.g. Skincare, Serum…"
-          className={`w-full text-sm border ${error ? "border-red-300" : "border-pink-200"} rounded-xl px-3.5 py-2.5 pr-8 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100 placeholder:text-gray-300 bg-white transition-all`}
+          placeholder="e.g. Serum, T-Shirts…"
+          className={`w-full text-sm border ${
+            error ? "border-red-300" : "border-pink-200"
+          } rounded-xl px-3.5 py-2.5 pr-8 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100 placeholder:text-gray-300 bg-white transition-all`}
         />
         <ChevronDown
-          className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none transition-transform ${open ? "rotate-180" : ""}`}
+          className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300 pointer-events-none transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
         />
       </div>
-      {open && filtered.length > 0 && (
-        <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-pink-100 rounded-xl shadow-xl shadow-pink-100/50 max-h-48 overflow-y-auto">
-          {filtered.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onMouseDown={() => {
-                setQ(s);
-                onChange(s);
-                setOpen(false);
-              }}
-              className={`w-full text-left text-sm px-4 py-2.5 flex items-center gap-2.5 hover:bg-pink-50 transition-colors ${value === s ? "text-pink-600 font-medium" : "text-gray-600"}`}
-            >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: catColor(s) }}
-              />
-              {s}
-              {value === s && (
-                <Check className="w-3 h-3 ml-auto text-pink-400" />
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-pink-100 rounded-2xl shadow-xl shadow-pink-100/40 overflow-hidden flex flex-col"
+          style={{ maxHeight: 320 }}
+        >
+          {/* Search results mode */}
+          {isSearching ? (
+            <div className="overflow-y-auto">
+              {searchResults.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-4">
+                  No matches
+                </p>
+              ) : (
+                searchResults.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onMouseDown={() => select(s)}
+                    className={`w-full text-left text-sm px-4 py-2.5 flex items-center gap-2.5 hover:bg-pink-50 transition-colors ${
+                      value === s
+                        ? "text-pink-600 font-medium"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: catColor(s) }}
+                    />
+                    {s}
+                    {value === s && (
+                      <Check className="w-3 h-3 ml-auto text-pink-400" />
+                    )}
+                  </button>
+                ))
               )}
-            </button>
-          ))}
+            </div>
+          ) : (
+            /* Grouped accordion mode */
+            <div className="overflow-y-auto">
+              {Object.entries(CATEGORIES).map(([group, subs]) => {
+                const isOpen = expanded[group];
+                const hasSelected = subs.includes(value);
+                return (
+                  <div key={group}>
+                    {/* Group header */}
+                    <button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        toggleGroup(group);
+                      }}
+                      className={`w-full text-left flex items-center justify-between px-4 py-2.5 transition-colors ${
+                        hasSelected
+                          ? "bg-pink-50 text-pink-600"
+                          : "hover:bg-gray-50 text-gray-700"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: catColor(group) }}
+                        />
+                        <span className="text-[11px] font-bold uppercase tracking-wider">
+                          {group}
+                        </span>
+                        {hasSelected && (
+                          <span className="text-[10px] px-1.5 py-0.5 bg-pink-100 text-pink-500 rounded-full font-semibold">
+                            {value}
+                          </span>
+                        )}
+                      </span>
+                      <ChevronRight
+                        className={`w-3.5 h-3.5 text-gray-300 transition-transform duration-200 ${
+                          isOpen ? "rotate-90" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Subcategories */}
+                    {isOpen && (
+                      <div className="bg-pink-50/40 border-t border-b border-pink-50">
+                        {subs.map((sub) => (
+                          <button
+                            key={sub}
+                            type="button"
+                            onMouseDown={() => select(sub)}
+                            className={`w-full text-left text-sm pl-8 pr-4 py-2 flex items-center gap-2.5 hover:bg-pink-50 transition-colors ${
+                              value === sub
+                                ? "text-pink-600 font-semibold"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-pink-200 shrink-0" />
+                            {sub}
+                            {value === sub && (
+                              <Check className="w-3 h-3 ml-auto text-pink-400" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+
+// ── ImageUploadZone ───────────────────────────────────────────────────────────
 
 function ImageUploadZone({
   images,
@@ -216,11 +457,22 @@ function ImageUploadZone({
         Images
       </label>
       <div
-        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
         onDragLeave={() => setDrag(false)}
-        onDrop={(e) => { e.preventDefault(); setDrag(false); process(e.dataTransfer.files); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          process(e.dataTransfer.files);
+        }}
         onClick={() => inputRef.current?.click()}
-        className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-2xl cursor-pointer transition-all py-8 ${drag ? "border-pink-400 bg-pink-50" : "border-pink-200 hover:border-pink-300 hover:bg-pink-50/50"}`}
+        className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-2xl cursor-pointer transition-all py-8 ${
+          drag
+            ? "border-pink-400 bg-pink-50"
+            : "border-pink-200 hover:border-pink-300 hover:bg-pink-50/50"
+        }`}
       >
         <div className="w-10 h-10 rounded-xl bg-pink-100 flex items-center justify-center">
           <Upload className="w-4 h-4 text-pink-400" />
@@ -229,7 +481,9 @@ function ImageUploadZone({
           Drop images or{" "}
           <span className="text-pink-500 font-medium">click to upload</span>
         </p>
-        <p className="text-xs text-gray-300">PNG, JPG, WEBP — multiple allowed</p>
+        <p className="text-xs text-gray-300">
+          PNG, JPG, WEBP — multiple allowed
+        </p>
         <input
           ref={inputRef}
           type="file"
@@ -246,12 +500,20 @@ function ImageUploadZone({
               key={img.id}
               className="relative group aspect-square rounded-xl overflow-hidden border-2 border-pink-100"
             >
-              <img src={img.url} alt="" className="w-full h-full object-cover" />
+              <img
+                src={img.url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => onSetPrimary(img.id)}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${img.isPrimary ? "bg-yellow-400 text-black" : "bg-white/80 hover:bg-yellow-400 hover:text-black text-gray-600"}`}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+                    img.isPrimary
+                      ? "bg-yellow-400 text-black"
+                      : "bg-white/80 hover:bg-yellow-400 hover:text-black text-gray-600"
+                  }`}
                 >
                   <Star className="w-3 h-3" />
                 </button>
@@ -265,7 +527,9 @@ function ImageUploadZone({
               </div>
               {img.isPrimary && (
                 <div className="absolute top-1 left-1 px-1.5 py-0.5 bg-yellow-400 rounded-md">
-                  <span className="text-[9px] font-bold text-black uppercase">Main</span>
+                  <span className="text-[9px] font-bold text-black uppercase">
+                    Main
+                  </span>
                 </div>
               )}
             </div>
@@ -275,6 +539,8 @@ function ImageUploadZone({
     </div>
   );
 }
+
+// ── StockStepper ──────────────────────────────────────────────────────────────
 
 function StockStepper({
   value,
@@ -291,7 +557,11 @@ function StockStepper({
       <label className="block text-[11px] uppercase tracking-[0.2em] text-pink-400 font-semibold mb-1.5">
         Stock Count
       </label>
-      <div className={`inline-flex items-center border-2 ${error ? "border-red-300" : "border-pink-200"} rounded-xl overflow-hidden bg-white`}>
+      <div
+        className={`inline-flex items-center border-2 ${
+          error ? "border-red-300" : "border-pink-200"
+        } rounded-xl overflow-hidden bg-white`}
+      >
         <button
           type="button"
           onClick={() => onChange(String(Math.max(0, n - 1)))}
@@ -324,6 +594,8 @@ function StockStepper({
   );
 }
 
+// ── Toggle ────────────────────────────────────────────────────────────────────
+
 function Toggle({
   label,
   checked,
@@ -340,7 +612,11 @@ function Toggle({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative w-10 h-5 rounded-full transition-all duration-300 ${checked ? "bg-gradient-to-r from-pink-500 to-rose-400 shadow-md shadow-pink-200" : "bg-gray-200"}`}
+        className={`relative w-10 h-5 rounded-full transition-all duration-300 ${
+          checked
+            ? "bg-gradient-to-r from-pink-500 to-rose-400 shadow-md shadow-pink-200"
+            : "bg-gray-200"
+        }`}
       >
         <span
           className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-300"
@@ -353,6 +629,8 @@ function Toggle({
     </label>
   );
 }
+
+// ── Field ─────────────────────────────────────────────────────────────────────
 
 function Field({
   label,
@@ -380,7 +658,9 @@ function Field({
 }
 
 const iCls = (e?: string) =>
-  `w-full text-sm border ${e ? "border-red-300" : "border-pink-200"} rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100 placeholder:text-gray-300 bg-white transition-all`;
+  `w-full text-sm border ${
+    e ? "border-red-300" : "border-pink-200"
+  } rounded-xl px-3.5 py-2.5 outline-none focus:border-pink-400 focus:ring-2 focus:ring-pink-100 placeholder:text-gray-300 bg-white transition-all`;
 
 // ── Product Modal ─────────────────────────────────────────────────────────────
 
@@ -434,15 +714,20 @@ function ProductModal({
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = "Required";
     if (!form.category.trim()) e.category = "Required";
-    if (!form.price || isNaN(Number(form.price))) e.price = "Valid price required";
+    if (!form.price || isNaN(Number(form.price)))
+      e.price = "Valid price required";
     if (!form.description.trim()) e.description = "Required";
-    if (form.stock === "" || isNaN(Number(form.stock))) e.stock = "Valid count required";
+    if (form.stock === "" || isNaN(Number(form.stock)))
+      e.stock = "Valid count required";
     return e;
   };
 
   const submit = async () => {
     const e = validate();
-    if (Object.keys(e).length) { setErrors(e); return; }
+    if (Object.keys(e).length) {
+      setErrors(e);
+      return;
+    }
 
     setSaving(true);
     try {
@@ -470,9 +755,11 @@ function ProductModal({
           if (img.isPrimary) newPrimaryIndex = idx;
         }
       });
-      if (newPrimaryIndex >= 0) fd.append("primary_index", String(newPrimaryIndex));
+      if (newPrimaryIndex >= 0)
+        fd.append("primary_index", String(newPrimaryIndex));
 
-      const url = mode === "create" ? "/api/products" : `/api/products/${product!.id}`;
+      const url =
+        mode === "create" ? "/api/products" : `/api/products/${product!.id}`;
       const method = mode === "create" ? "POST" : "PUT";
 
       const res = await fetch(url, { method, body: fd });
@@ -482,7 +769,9 @@ function ProductModal({
         if (json.errors) {
           const mapped: Record<string, string> = {};
           Object.entries(json.errors as Record<string, string[]>).forEach(
-            ([k, v]) => { mapped[k] = v[0]; },
+            ([k, v]) => {
+              mapped[k] = v[0];
+            },
           );
           setErrors(mapped);
         } else {
@@ -504,7 +793,10 @@ function ProductModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative bg-white rounded-3xl shadow-2xl shadow-pink-200/40 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-pink-100">
         <div className="bg-gradient-to-r from-pink-500 to-rose-400 px-6 py-5 flex items-center justify-between shrink-0">
           <div>
@@ -512,7 +804,9 @@ function ProductModal({
               {mode === "create" ? "New Product" : "Edit Product"}
             </p>
             <h2 className="font-serif text-xl text-white">
-              {mode === "create" ? "Add to Collection" : form.name || "Untitled"}
+              {mode === "create"
+                ? "Add to Collection"
+                : form.name || "Untitled"}
             </h2>
           </div>
           <button
@@ -535,7 +829,8 @@ function ProductModal({
             onRemove={(id) =>
               setImages((p) => {
                 const n = p.filter((i) => i.id !== id);
-                if (n.length > 0 && !n.some((i) => i.isPrimary)) n[0].isPrimary = true;
+                if (n.length > 0 && !n.some((i) => i.isPrimary))
+                  n[0].isPrimary = true;
                 return n;
               })
             }
@@ -606,8 +901,16 @@ function ProductModal({
             disabled={saving}
             className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white text-sm font-medium rounded-xl shadow-md shadow-pink-200 hover:shadow-pink-300 active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-            {saving ? "Saving…" : mode === "create" ? "Add Product" : "Save Changes"}
+            {saving ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Check className="w-3.5 h-3.5" />
+            )}
+            {saving
+              ? "Saving…"
+              : mode === "create"
+                ? "Add Product"
+                : "Save Changes"}
           </button>
         </div>
       </div>
@@ -634,7 +937,10 @@ function DeleteModal({
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative bg-white border border-red-100 rounded-3xl shadow-2xl shadow-red-100/40 w-full max-w-sm p-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center">
@@ -682,21 +988,29 @@ function ViewModal({
   onEdit: () => void;
 }) {
   const [activeIdx, setActiveIdx] = useState(
-    Math.max(product.images.findIndex((i) => i.isPrimary), 0),
+    Math.max(
+      product.images.findIndex((i) => i.isPrimary),
+      0,
+    ),
   );
   const images = product.images;
   const active = images[activeIdx];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative bg-white rounded-3xl shadow-2xl shadow-pink-200/40 w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-pink-100">
         <div className="bg-gradient-to-r from-pink-500 to-rose-400 px-6 py-5 flex items-center justify-between shrink-0">
           <div>
             <p className="text-[10px] uppercase tracking-[0.25em] text-pink-100 font-semibold mb-0.5">
               Product Detail
             </p>
-            <h2 className="font-serif text-xl text-white truncate max-w-sm">{product.name}</h2>
+            <h2 className="font-serif text-xl text-white truncate max-w-sm">
+              {product.name}
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -710,17 +1024,27 @@ function ViewModal({
           {images.length > 0 ? (
             <div className="space-y-3">
               <div className="relative aspect-video w-full rounded-2xl overflow-hidden bg-pink-50 border border-pink-100">
-                <img src={active?.url} alt={product.name} className="w-full h-full object-contain" />
+                <img
+                  src={active?.url}
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
                 {images.length > 1 && (
                   <>
                     <button
-                      onClick={() => setActiveIdx((i) => (i - 1 + images.length) % images.length)}
+                      onClick={() =>
+                        setActiveIdx(
+                          (i) => (i - 1 + images.length) % images.length,
+                        )
+                      }
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-all"
                     >
                       <ChevronLeft className="w-4 h-4 text-gray-600" />
                     </button>
                     <button
-                      onClick={() => setActiveIdx((i) => (i + 1) % images.length)}
+                      onClick={() =>
+                        setActiveIdx((i) => (i + 1) % images.length)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/80 shadow flex items-center justify-center hover:bg-white transition-all"
                     >
                       <ChevronRight className="w-4 h-4 text-gray-600" />
@@ -730,7 +1054,11 @@ function ViewModal({
                         <button
                           key={idx}
                           onClick={() => setActiveIdx(idx)}
-                          className={`w-1.5 h-1.5 rounded-full transition-all ${idx === activeIdx ? "bg-pink-500 w-4" : "bg-white/60"}`}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${
+                            idx === activeIdx
+                              ? "bg-pink-500 w-4"
+                              : "bg-white/60"
+                          }`}
                         />
                       ))}
                     </div>
@@ -743,9 +1071,17 @@ function ViewModal({
                     <button
                       key={img.id}
                       onClick={() => setActiveIdx(idx)}
-                      className={`shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${idx === activeIdx ? "border-pink-400" : "border-pink-100 opacity-60 hover:opacity-100"}`}
+                      className={`shrink-0 w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${
+                        idx === activeIdx
+                          ? "border-pink-400"
+                          : "border-pink-100 opacity-60 hover:opacity-100"
+                      }`}
                     >
-                      <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      <img
+                        src={img.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -761,18 +1097,38 @@ function ViewModal({
             <div className="bg-pink-50/60 rounded-2xl p-4 border border-pink-100">
               <div className="flex items-center gap-2 mb-1">
                 <DollarSign className="w-3.5 h-3.5 text-pink-400" />
-                <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">Price</span>
+                <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">
+                  Price
+                </span>
               </div>
-              <p className="text-2xl font-bold text-gray-800">${product.price.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                ${product.price.toFixed(2)}
+              </p>
             </div>
             <div className="bg-pink-50/60 rounded-2xl p-4 border border-pink-100">
               <div className="flex items-center gap-2 mb-1">
                 <Package className="w-3.5 h-3.5 text-pink-400" />
-                <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">Stock</span>
+                <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">
+                  Stock
+                </span>
               </div>
-              <p className="text-2xl font-bold text-gray-800">{product.stock}</p>
-              <p className={`text-xs mt-0.5 font-medium ${product.stock === 0 ? "text-red-400" : product.stock <= 5 ? "text-amber-500" : "text-emerald-500"}`}>
-                {product.stock === 0 ? "Out of stock" : product.stock <= 5 ? "Low stock" : "In stock"}
+              <p className="text-2xl font-bold text-gray-800">
+                {product.stock}
+              </p>
+              <p
+                className={`text-xs mt-0.5 font-medium ${
+                  product.stock === 0
+                    ? "text-red-400"
+                    : product.stock <= 5
+                      ? "text-amber-500"
+                      : "text-emerald-500"
+                }`}
+              >
+                {product.stock === 0
+                  ? "Out of stock"
+                  : product.stock <= 5
+                    ? "Low stock"
+                    : "In stock"}
               </p>
             </div>
           </div>
@@ -780,7 +1136,9 @@ function ViewModal({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Tag className="w-3.5 h-3.5 text-pink-400" />
-              <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">Category</span>
+              <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">
+                Category
+              </span>
             </div>
             <div className="flex items-center gap-2 mt-1.5">
               <span className="px-3 py-1.5 rounded-full bg-pink-50 border border-pink-100 text-xs text-gray-600 font-medium">
@@ -795,8 +1153,12 @@ function ViewModal({
           </div>
 
           <div className="space-y-1.5">
-            <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">Description</span>
-            <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
+            <span className="text-[10px] uppercase tracking-widest text-pink-400 font-semibold">
+              Description
+            </span>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {product.description}
+            </p>
           </div>
 
           <p className="text-[11px] text-gray-300">Added {product.createdAt}</p>
@@ -844,7 +1206,9 @@ export default function AdminProductsPage() {
         if (!res.ok) throw new Error(json.message ?? "Failed to load");
         setProducts((json.data as BackendProduct[]).map(toFrontend));
       } catch (err) {
-        setFetchErr(err instanceof Error ? err.message : "Failed to load products");
+        setFetchErr(
+          err instanceof Error ? err.message : "Failed to load products",
+        );
       } finally {
         setLoading(false);
       }
@@ -855,7 +1219,9 @@ export default function AdminProductsPage() {
   const filtered = products.filter((p) => {
     const s = search.toLowerCase();
     return (
-      (!s || p.name.toLowerCase().includes(s) || p.category.toLowerCase().includes(s)) &&
+      (!s ||
+        p.name.toLowerCase().includes(s) ||
+        p.category.toLowerCase().includes(s)) &&
       (!catFilter || p.category === catFilter)
     );
   });
@@ -898,7 +1264,8 @@ export default function AdminProductsPage() {
       console.error(err);
       toast({
         title: "Delete failed",
-        description: err instanceof Error ? err.message : "Something went wrong.",
+        description:
+          err instanceof Error ? err.message : "Something went wrong.",
         variant: "destructive",
       });
     }
@@ -976,7 +1343,9 @@ export default function AdminProductsPage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs text-gray-400 font-medium">{s.label}</p>
-                <div className={`w-8 h-8 rounded-xl ${s.light} flex items-center justify-center`}>
+                <div
+                  className={`w-8 h-8 rounded-xl ${s.light} flex items-center justify-center`}
+                >
                   <Icon className={`w-4 h-4 ${s.text}`} />
                 </div>
               </div>
@@ -985,7 +1354,9 @@ export default function AdminProductsPage() {
               <div className="mt-3 h-1 rounded-full bg-gray-100 overflow-hidden">
                 <div
                   className={`h-full rounded-full bg-gradient-to-r ${s.from} ${s.to} transition-all duration-700`}
-                  style={{ width: `${Math.min((s.value / s.max) * 100, 100)}%` }}
+                  style={{
+                    width: `${Math.min((s.value / s.max) * 100, 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -1009,7 +1380,11 @@ export default function AdminProductsPage() {
             <button
               key={cat}
               onClick={() => setCatFilter(cat)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all ${catFilter === cat ? "bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md shadow-pink-200" : "bg-white border border-pink-200 text-gray-500 hover:border-pink-300 hover:text-pink-600"}`}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium transition-all ${
+                catFilter === cat
+                  ? "bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md shadow-pink-200"
+                  : "bg-white border border-pink-200 text-gray-500 hover:border-pink-300 hover:text-pink-600"
+              }`}
             >
               {cat && (
                 <span
@@ -1065,12 +1440,17 @@ export default function AdminProductsPage() {
               width: "1fr",
               headerClassName: "pl-[56px]",
               render: (_, p: Product) => {
-                const primary = p.images.find((i) => i.isPrimary) ?? p.images[0];
+                const primary =
+                  p.images.find((i) => i.isPrimary) ?? p.images[0];
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-11 h-11 rounded-xl overflow-hidden border-2 border-pink-100 shrink-0 bg-pink-50">
                       {primary ? (
-                        <img src={primary.url} alt="" className="w-full h-full object-cover" />
+                        <img
+                          src={primary.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ImageIcon className="w-4 h-4 text-pink-200" />
@@ -1079,7 +1459,9 @@ export default function AdminProductsPage() {
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-gray-800 truncate">{p.name}</p>
+                        <p className="text-sm font-semibold text-gray-800 truncate">
+                          {p.name}
+                        </p>
                         {p.featured && (
                           <span className="text-[9px] px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-100 to-rose-100 text-pink-500 font-semibold uppercase tracking-wide shrink-0 border border-pink-200">
                             Featured
@@ -1091,7 +1473,9 @@ export default function AdminProductsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-400 truncate mt-0.5">{p.description}</p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">
+                        {p.description}
+                      </p>
                     </div>
                   </div>
                 );
@@ -1107,7 +1491,9 @@ export default function AdminProductsPage() {
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ backgroundColor: catColor(p.category) }}
                   />
-                  <span className="text-xs text-gray-600 font-medium">{p.category}</span>
+                  <span className="text-xs text-gray-600 font-medium">
+                    {p.category}
+                  </span>
                 </div>
               ),
             },
@@ -1128,12 +1514,23 @@ export default function AdminProductsPage() {
               render: (v: number) => {
                 const badge =
                   v === 0
-                    ? { label: "Out of Stock", cls: "bg-red-50 text-red-500 border border-red-100" }
+                    ? {
+                        label: "Out of Stock",
+                        cls: "bg-red-50 text-red-500 border border-red-100",
+                      }
                     : v <= 5
-                    ? { label: `Low — ${v}`, cls: "bg-amber-50 text-amber-600 border border-amber-100" }
-                    : { label: `${v} units`, cls: "bg-emerald-50 text-emerald-600 border border-emerald-100" };
+                      ? {
+                          label: `Low — ${v}`,
+                          cls: "bg-amber-50 text-amber-600 border border-amber-100",
+                        }
+                      : {
+                          label: `${v} units`,
+                          cls: "bg-emerald-50 text-emerald-600 border border-emerald-100",
+                        };
                 return (
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${badge.cls}`}>
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded-full font-medium whitespace-nowrap ${badge.cls}`}
+                  >
                     {badge.label}
                   </span>
                 );
