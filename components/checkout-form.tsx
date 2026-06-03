@@ -10,6 +10,7 @@ import {
   AlertCircle,
   ShoppingBag,
   Lock,
+  Store,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-store";
@@ -62,6 +63,13 @@ const PAYMENT_METHODS = [
     label: "Afterpay",
     icon: null,
     description: "Pay in 4 interest-free installments",
+    upcoming: false,
+  },
+  {
+    value: "pay_in_store",
+    label: "Pay In Store",
+    icon: null,
+    description: "Tap your card on our EFTPOS terminal upon pickup",
     upcoming: false,
   },
 ];
@@ -143,7 +151,7 @@ export function CheckoutForm() {
     ...EMPTY_ADDRESS,
   });
   const [paymentMethod, setPaymentMethod] = useState<
-    "card" | "gcash" | "afterpay"
+    "card" | "gcash" | "afterpay" | "pay_in_store"
   >("afterpay");
   const [notes, setNotes] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -280,6 +288,14 @@ export function CheckoutForm() {
         return;
       }
 
+      // ── Pay In Store: just save order, no payment processing ─────────────
+      if (paymentMethod === "pay_in_store") {
+        clearCart();
+        setOrderNumber(json.data.order_number);
+        setSuccess(true);
+        return;
+      }
+
       // ── Afterpay: redirect to their hosted payment page ──────────────────
       if (paymentMethod === "afterpay") {
         if (json.data?.afterpay_redirect_url) {
@@ -322,9 +338,25 @@ export function CheckoutForm() {
           <p className="text-foreground/60 mb-2">
             Thank you for shopping with Skye Avenue.
           </p>
-          <p className="text-sm font-semibold text-pink-500 mb-8">
+          <p className="text-sm font-semibold text-pink-500 mb-2">
             Order #{orderNumber}
           </p>
+          {/* Pay In Store reminder */}
+          {paymentMethod === "pay_in_store" && (
+            <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl mb-8 text-left">
+              <Store className="w-5 h-5 text-amber-500 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-700">
+                  Payment due in store
+                </p>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  Please have your card ready to tap on our EFTPOS terminal upon
+                  pickup. Total due:{" "}
+                  <span className="font-bold">${total.toFixed(2)}</span>
+                </p>
+              </div>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/products">
               <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md h-11 px-6">
@@ -545,6 +577,9 @@ export function CheckoutForm() {
                       {pm.value === "afterpay" && (
                         <AfterpayLogo className="h-5 w-auto" />
                       )}
+                      {pm.value === "pay_in_store" && (
+                        <Store className="w-4 h-4 text-pink-400" />
+                      )}
                       <span className="text-sm text-foreground font-medium">
                         {pm.label}
                       </span>
@@ -589,6 +624,28 @@ export function CheckoutForm() {
                       You&apos;ll be redirected to Afterpay to complete your
                       payment. No interest, no fees when you pay on time.
                     </p>
+                  </div>
+                )}
+
+                {/* Pay In Store info box */}
+                {paymentMethod === "pay_in_store" && (
+                  <div className="mt-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div className="flex items-start gap-2">
+                      <Store className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-amber-700 mb-1">
+                          How it works
+                        </p>
+                        <ul className="text-[11px] text-amber-600 space-y-0.5 list-disc list-inside">
+                          <li>
+                            Place your order now — no payment needed online
+                          </li>
+                          <li>Come to our store to pick up your order</li>
+                          <li>Tap your card on our EFTPOS terminal</li>
+                          <li>Afterpay in-store accepted too!</li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -647,6 +704,15 @@ export function CheckoutForm() {
                   </div>
                 )}
 
+                {paymentMethod === "pay_in_store" && (
+                  <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg border border-amber-200">
+                    <Store className="w-4 h-4 text-amber-500 shrink-0" />
+                    <span className="text-xs text-amber-700 font-medium">
+                      Pay <strong>${total.toFixed(2)}</strong> in store
+                    </span>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
                   disabled={submitting || items.length === 0}
@@ -663,7 +729,9 @@ export function CheckoutForm() {
                     <>
                       {paymentMethod === "afterpay"
                         ? "Continue to Afterpay"
-                        : "Place Order"}
+                        : paymentMethod === "pay_in_store"
+                          ? "Place Order – Pay In Store"
+                          : "Place Order"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
