@@ -1,14 +1,18 @@
 // app/api/checkout/route.ts
 
 import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+// ── Stripe ────────────────────────────────────────────────────────────────────
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 // ── Afterpay config ───────────────────────────────────────────────────────────
 const AFTERPAY_ENV = process.env.AFTERPAY_ENVIRONMENT ?? "sandbox";
 const AFTERPAY_MERCHANT_ID = process.env.AFTERPAY_MERCHANT_ID!;
 const AFTERPAY_SECRET_KEY = process.env.AFTERPAY_SECRET_KEY!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 const AFTERPAY_BASE =
   AFTERPAY_ENV === "production"
@@ -28,7 +32,7 @@ function afterpayAuth(): string {
 interface CartItem {
   product_id: number;
   qty: number;
-  price: number; // ← now always present from frontend
+  price: number;
   name?: string;
 }
 
@@ -38,8 +42,85 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const token = req.cookies.get("auth_token")?.value;
 
-    // ── Non-Afterpay: forward to Laravel backend as-is ───────────────────────
-    if (body.payment_method !== "afterpay") {
+    const {
+      customer_name,
+      customer_email,
+      customer_phone_number,
+      shipping_address,
+      items,
+      payment_method,
+      notes,
+    } = body;
+
+    // ── Stripe Card flow ──────────────────────────────────────────────────────
+    if (payment_method === "card") {
+      // Step 1: Create a pending order in Laravel to get an order number
+      const orderRes = await fetch(`${API_URL}/api/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ ...body, status: "pending" }),
+      });
+
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok) {
+        return NextResponse.json(orderData, { status: orderRes.status });
+      }
+
+      const order_number: string = orderData.data?.order_number;
+
+      if (!order_number) {
+        return NextResponse.json(
+          { message: "Order created but no order number returned." },
+          { status: 500 },
+        );
+      }
+
+      // Step 2: Create Stripe Checkout session
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer_email,
+        line_items: items.map((item: CartItem) => ({
+          price_data: {
+            currency: "aud", // change to your currency if needed
+            product_data: {
+              name: item.name ?? `Product #${item.product_id}`,
+            },
+            unit_amount: Math.round(item.price * 100), // Stripe uses cents
+          },
+          quantity: item.qty,
+        })),
+        success_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order=${order_number}`,
+        cancel_url: `${APP_URL}/checkout?cancelled=true`,
+        metadata: {
+          order_number,
+          customer_name,
+          notes: notes ?? "",
+        },
+        payment_intent_data: {
+          metadata: {
+            order_number,
+          },
+        },
+      });
+
+      return NextResponse.json(
+        {
+          data: {
+            order_number,
+            stripe_url: session.url,
+          },
+        },
+        { status: 201 },
+      );
+    }
+
+    // ── Pay In Store / other non-Afterpay: forward to Laravel as-is ──────────
+    if (payment_method !== "afterpay") {
       const response = await fetch(`${API_URL}/api/checkout`, {
         method: "POST",
         headers: {
@@ -61,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     // ── Afterpay flow ─────────────────────────────────────────────────────────
 
-    // Step 1: Create a pending order in Laravel first to get an order number
+    // Step 1: Create a pending order in Laravel first
     const orderRes = await fetch(`${API_URL}/api/checkout`, {
       method: "POST",
       headers: {
@@ -88,15 +169,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 2: Build Afterpay checkout session
-    const {
-      customer_name,
-      customer_email,
-      customer_phone_number,
-      shipping_address,
-      items,
-    } = body;
-
-    // Use prices from the cart payload (sent by CheckoutForm)
     const totalAmount: number = items.reduce(
       (sum: number, item: CartItem) => sum + item.price * item.qty,
       0,
@@ -140,7 +212,6 @@ export async function POST(req: NextRequest) {
           ? { phoneNumber: customer_phone_number }
           : {}),
       },
-      // ── FIXED: use item.price directly (sent from cart) ──────────────────
       items: items.map((item: CartItem) => ({
         name: item.name ?? `Product #${item.product_id}`,
         quantity: item.qty,
@@ -180,7 +251,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 3: Return the Afterpay redirect URL to the frontend
     return NextResponse.json(
       {
         data: {

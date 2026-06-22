@@ -48,16 +48,9 @@ const PAYMENT_METHODS = [
     value: "card",
     label: "Credit / Debit Card",
     icon: "💳",
-    description: null,
-    upcoming: true,
+    description: "Visa, Mastercard, Apple Pay, Google Pay",
+    upcoming: false, // ← enabled now
   },
-  // {
-  //   value: "gcash",
-  //   label: "GCash",
-  //   icon: "📱",
-  //   description: null,
-  //   upcoming: true,
-  // },
   {
     value: "afterpay",
     label: "Afterpay",
@@ -288,6 +281,20 @@ export function CheckoutForm() {
         return;
       }
 
+      // ── Stripe Card: redirect to Stripe Checkout ─────────────────────────
+      if (paymentMethod === "card") {
+        if (json.data?.stripe_url) {
+          clearCart();
+          window.location.href = json.data.stripe_url;
+        } else {
+          setErrors({
+            _global:
+              "Could not initiate card payment. Please try another payment method.",
+          });
+        }
+        return;
+      }
+
       // ── Pay In Store: just save order, no payment processing ─────────────
       if (paymentMethod === "pay_in_store") {
         clearCart();
@@ -310,7 +317,7 @@ export function CheckoutForm() {
         return;
       }
 
-      // ── All other methods: show success screen ───────────────────────────
+      // ── Fallback success ──────────────────────────────────────────────────
       clearCart();
       setOrderNumber(json.data.order_number);
       setSuccess(true);
@@ -324,7 +331,7 @@ export function CheckoutForm() {
 
   const installmentAmount = (total / 4).toFixed(2);
 
-  // ── Success screen ────────────────────────────────────────────────────────
+  // ── Success screen (pay_in_store only — card/afterpay redirect externally) ─
   if (success) {
     return (
       <section className="py-16">
@@ -338,10 +345,9 @@ export function CheckoutForm() {
           <p className="text-foreground/60 mb-2">
             Thank you for shopping with Skye Avenue.
           </p>
-          <p className="text-sm font-semibold text-pink-500 mb-2">
+          <p className="text-sm font-semibold text-pink-500 mb-6">
             Order #{orderNumber}
           </p>
-          {/* Pay In Store reminder */}
           {paymentMethod === "pay_in_store" && (
             <div className="flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl mb-8 text-left">
               <Store className="w-5 h-5 text-amber-500 shrink-0" />
@@ -596,6 +602,24 @@ export function CheckoutForm() {
                   </label>
                 ))}
 
+                {/* Card info box */}
+                {paymentMethod === "card" && (
+                  <div className="mt-2 p-3.5 bg-blue-50 border border-blue-100 rounded-xl">
+                    <div className="flex items-start gap-2">
+                      <span className="text-base">💳</span>
+                      <div>
+                        <p className="text-xs font-semibold text-blue-700 mb-1">
+                          Secure payment via Stripe
+                        </p>
+                        <p className="text-[11px] text-blue-500">
+                          You'll be redirected to Stripe's secure payment page.
+                          Visa, Mastercard, Apple Pay and Google Pay accepted.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Afterpay installment breakdown */}
                 {paymentMethod === "afterpay" && total > 0 && (
                   <div className="mt-2 p-3.5 bg-[#B2FCE4]/20 border border-[#B2FCE4] rounded-xl">
@@ -695,6 +719,15 @@ export function CheckoutForm() {
                   </span>
                 </div>
 
+                {paymentMethod === "card" && (
+                  <div className="flex items-center gap-2 p-2.5 bg-blue-50 rounded-lg border border-blue-100">
+                    <span className="text-sm">💳</span>
+                    <span className="text-xs text-blue-600 font-medium">
+                      Secure card payment via Stripe
+                    </span>
+                  </div>
+                )}
+
                 {paymentMethod === "afterpay" && total > 0 && (
                   <div className="flex items-center gap-2 p-2.5 bg-[#B2FCE4]/20 rounded-lg border border-[#B2FCE4]/60">
                     <AfterpayLogo className="h-4 w-auto" />
@@ -723,15 +756,19 @@ export function CheckoutForm() {
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {paymentMethod === "afterpay"
                         ? "Redirecting to Afterpay…"
-                        : "Placing Order…"}
+                        : paymentMethod === "card"
+                          ? "Redirecting to Stripe…"
+                          : "Placing Order…"}
                     </>
                   ) : (
                     <>
                       {paymentMethod === "afterpay"
                         ? "Continue to Afterpay"
-                        : paymentMethod === "pay_in_store"
-                          ? "Place Order – Pay In Store"
-                          : "Place Order"}
+                        : paymentMethod === "card"
+                          ? "Pay with Card"
+                          : paymentMethod === "pay_in_store"
+                            ? "Place Order – Pay In Store"
+                            : "Place Order"}
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </>
                   )}
