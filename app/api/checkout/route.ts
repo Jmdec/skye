@@ -5,8 +5,6 @@ import Stripe from "stripe";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-// ── Stripe ────────────────────────────────────────────────────────────────────
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 // ── Afterpay config ───────────────────────────────────────────────────────────
@@ -38,6 +36,8 @@ interface CartItem {
 
 // ── Handler ───────────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
   try {
     const body = await req.json();
     const token = req.cookies.get("auth_token")?.value;
