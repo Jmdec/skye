@@ -84,16 +84,27 @@ export async function POST(req: NextRequest) {
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer_email,
-        line_items: items.map((item: CartItem) => ({
-          price_data: {
-            currency: "aud", // change to your currency if needed
-            product_data: {
-              name: item.name ?? `Product #${item.product_id}`,
+        line_items: [
+          ...items.map((item: CartItem) => ({
+            price_data: {
+              currency: "aud",
+              product_data: {
+                name: item.name ?? `Product #${item.product_id}`,
+              },
+              unit_amount: Math.round(item.price * 100),
             },
-            unit_amount: Math.round(item.price * 100), // Stripe uses cents
+            quantity: item.qty,
+          })),
+          // Shipping as a line item
+          {
+            price_data: {
+              currency: "aud",
+              product_data: { name: "Standard Shipping (via Australia Post)" },
+              unit_amount: Math.round((body.shipping_cost ?? 10) * 100),
+            },
+            quantity: 1,
           },
-          quantity: item.qty,
-        })),
+        ],
         success_url: `${APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}&order=${order_number}`,
         cancel_url: `${APP_URL}/checkout?cancelled=true`,
         metadata: {
@@ -169,10 +180,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Step 2: Build Afterpay checkout session
-    const totalAmount: number = items.reduce(
-      (sum: number, item: CartItem) => sum + item.price * item.qty,
-      0,
-    );
+    const shippingCost: number = body.shipping_cost ?? 10;
+    const totalAmount: number =
+      items.reduce(
+        (sum: number, item: CartItem) => sum + item.price * item.qty,
+        0,
+      ) + shippingCost;
 
     const afterpayPayload = {
       amount: {

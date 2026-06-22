@@ -49,7 +49,7 @@ const PAYMENT_METHODS = [
     label: "Credit / Debit Card",
     icon: "💳",
     description: "Visa, Mastercard, Apple Pay, Google Pay",
-    upcoming: false, // ← enabled now
+    upcoming: false,
   },
   {
     value: "afterpay",
@@ -64,6 +64,21 @@ const PAYMENT_METHODS = [
     icon: null,
     description: "Tap your card on our EFTPOS terminal upon pickup",
     upcoming: false,
+  },
+];
+
+const SHIPPING_METHODS = [
+  {
+    value: "standard",
+    label: "Standard",
+    description: "2 to 8 business days",
+    cost: 10,
+  },
+  {
+    value: "express",
+    label: "Express",
+    description: "1 to 4 business days",
+    cost: 15,
   },
 ];
 
@@ -133,7 +148,6 @@ export function CheckoutForm() {
   const { items, getTotalPrice, clearCart } = useCart();
 
   const subtotal = getTotalPrice();
-  const total = subtotal;
 
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -143,6 +157,9 @@ export function CheckoutForm() {
   const [shippingAddr, setShippingAddr] = useState<Address>({
     ...EMPTY_ADDRESS,
   });
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">(
+    "standard",
+  );
   const [paymentMethod, setPaymentMethod] = useState<
     "card" | "afterpay" | "pay_in_store"
   >("afterpay");
@@ -152,6 +169,10 @@ export function CheckoutForm() {
   const [success, setSuccess] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
   const [lastAddress, setLastAddress] = useState(false);
+
+  const shippingCost =
+    SHIPPING_METHODS.find((m) => m.value === shippingMethod)?.cost ?? 10;
+  const total = subtotal + shippingCost;
 
   // ── Fetch logged-in user & last address ──────────────────────────────────
   useEffect(() => {
@@ -245,6 +266,8 @@ export function CheckoutForm() {
           zip: shippingAddr.zip.trim(),
           country: shippingAddr.country.trim(),
         },
+        shipping_method: shippingMethod,
+        shipping_cost: shippingCost,
         payment_method: paymentMethod,
         notes: notes.trim() || undefined,
         items: items.map((item) => ({
@@ -295,7 +318,7 @@ export function CheckoutForm() {
         return;
       }
 
-      // ── Pay In Store: just save order, no payment processing ─────────────
+      // ── Pay In Store ──────────────────────────────────────────────────────
       if (paymentMethod === "pay_in_store") {
         clearCart();
         setOrderNumber(json.data.order_number);
@@ -303,7 +326,7 @@ export function CheckoutForm() {
         return;
       }
 
-      // ── Afterpay: redirect to their hosted payment page ──────────────────
+      // ── Afterpay ──────────────────────────────────────────────────────────
       if (paymentMethod === "afterpay") {
         if (json.data?.afterpay_redirect_url) {
           clearCart();
@@ -317,7 +340,7 @@ export function CheckoutForm() {
         return;
       }
 
-      // ── Fallback success ──────────────────────────────────────────────────
+      // ── Fallback ──────────────────────────────────────────────────────────
       clearCart();
       setOrderNumber(json.data.order_number);
       setSuccess(true);
@@ -331,7 +354,7 @@ export function CheckoutForm() {
 
   const installmentAmount = (total / 4).toFixed(2);
 
-  // ── Success screen (pay_in_store only — card/afterpay redirect externally) ─
+  // ── Success screen ────────────────────────────────────────────────────────
   if (success) {
     return (
       <section className="py-16">
@@ -549,6 +572,45 @@ export function CheckoutForm() {
                 </div>
               </div>
 
+              {/* ── Shipping Method ──────────────────────────────────────── */}
+              <div className="bg-white border border-pink-100 rounded-2xl p-6 space-y-3">
+                <h3 className="font-serif text-lg text-foreground mb-2">
+                  Shipping Method
+                </h3>
+                {SHIPPING_METHODS.map((sm) => (
+                  <label
+                    key={sm.value}
+                    className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all cursor-pointer ${
+                      shippingMethod === sm.value
+                        ? "border-pink-400 bg-pink-50/60"
+                        : "border-pink-100 hover:border-pink-200"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="shipping_method"
+                      value={sm.value}
+                      checked={shippingMethod === sm.value}
+                      onChange={() =>
+                        setShippingMethod(sm.value as typeof shippingMethod)
+                      }
+                      className="accent-pink-500"
+                    />
+                    <span className="flex-1">
+                      <span className="text-sm font-medium text-foreground">
+                        {sm.label}
+                      </span>
+                      <span className="block text-xs text-foreground/40 mt-0.5">
+                        {sm.description}
+                      </span>
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">
+                      ${sm.cost.toFixed(2)}
+                    </span>
+                  </label>
+                ))}
+              </div>
+
               {/* Payment Method */}
               <div className="bg-white border border-pink-100 rounded-2xl p-6 space-y-3">
                 <h3 className="font-serif text-lg text-foreground mb-2">
@@ -602,7 +664,6 @@ export function CheckoutForm() {
                   </label>
                 ))}
 
-                {/* Card info box */}
                 {paymentMethod === "card" && (
                   <div className="mt-2 p-3.5 bg-blue-50 border border-blue-100 rounded-xl">
                     <div className="flex items-start gap-2">
@@ -620,7 +681,6 @@ export function CheckoutForm() {
                   </div>
                 )}
 
-                {/* Afterpay installment breakdown */}
                 {paymentMethod === "afterpay" && total > 0 && (
                   <div className="mt-2 p-3.5 bg-[#B2FCE4]/20 border border-[#B2FCE4] rounded-xl">
                     <p className="text-xs font-semibold text-gray-700 mb-2">
@@ -651,7 +711,6 @@ export function CheckoutForm() {
                   </div>
                 )}
 
-                {/* Pay In Store info box */}
                 {paymentMethod === "pay_in_store" && (
                   <div className="mt-2 p-3.5 bg-amber-50 border border-amber-200 rounded-xl">
                     <div className="flex items-start gap-2">
@@ -710,6 +769,33 @@ export function CheckoutForm() {
                       </span>
                     </div>
                   ))}
+                </div>
+
+                {/* Subtotal + Shipping breakdown */}
+                <div className="space-y-2 pb-4 border-b border-border">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-foreground/60">Subtotal</span>
+                    <span className="text-foreground">
+                      ${subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-foreground/60">
+                      Shipping
+                      <span className="text-foreground/40 ml-1 text-xs">
+                        (
+                        {
+                          SHIPPING_METHODS.find(
+                            (m) => m.value === shippingMethod,
+                          )?.label
+                        }
+                        )
+                      </span>
+                    </span>
+                    <span className="text-foreground">
+                      ${shippingCost.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center">
