@@ -9,9 +9,13 @@ interface NewsletterSectionProps {
   variant?: Variant;
 }
 
-export function NewsletterSection({ variant = "default" }: NewsletterSectionProps) {
-  const [email, setEmail]     = useState("");
-  const [status, setStatus]   = useState<"idle" | "loading" | "success" | "error" | "duplicate">("idle");
+export function NewsletterSection({
+  variant = "default",
+}: NewsletterSectionProps) {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error" | "duplicate"
+  >("idle");
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,7 +23,7 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
     if (!email.trim()) return;
     setStatus("loading");
     try {
-      const res  = await fetch("/api/newsletter", {
+      const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
@@ -33,7 +37,9 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
       }
       if (!res.ok) {
         setStatus("error");
-        setMessage(data?.errors?.email?.[0] ?? data.message ?? "Something went wrong.");
+        setMessage(
+          data?.errors?.email?.[0] ?? data.message ?? "Something went wrong.",
+        );
         return;
       }
       setStatus("success");
@@ -45,42 +51,88 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
     }
   };
 
-  // ── Pink variant (used on announcements page) ─────────────────────────────
+  // ── Pink variant ──────────────────────────────────────────────────────────
   if (variant === "pink") {
     return (
       <section
         style={{
-          background: "linear-gradient(160deg, #fdf2f8, #fce7f3 50%, #fbcfe8 100%)",
+          background:
+            "linear-gradient(160deg, #fdf2f8, #fce7f3 50%, #fbcfe8 100%)",
           borderTop: "1px solid rgba(236,72,153,0.15)",
-          padding: "48px 40px",
+          padding: "48px 24px",
           textAlign: "center",
         }}
       >
-        <p style={{ fontSize: "10px", letterSpacing: ".28em", textTransform: "uppercase", color: "#ec4899", marginBottom: "10px" }}>
+        <p
+          style={{
+            fontSize: "10px",
+            letterSpacing: ".28em",
+            textTransform: "uppercase",
+            color: "#ec4899",
+            marginBottom: "10px",
+          }}
+        >
           Newsletter
         </p>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "36px", fontWeight: 300, color: "#500724", marginBottom: "10px" }}>
+        <h2
+          style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "36px",
+            fontWeight: 300,
+            color: "#500724",
+            marginBottom: "10px",
+          }}
+        >
           Stay in the <em style={{ fontStyle: "italic" }}>Loop.</em>
         </h2>
-        <p style={{ fontSize: "13px", color: "#831843", opacity: 0.65, marginBottom: "28px", lineHeight: 1.6 }}>
-          Subscribe for the latest announcements, exclusive offers, and skincare tips.
+        <p
+          style={{
+            fontSize: "13px",
+            color: "#831843",
+            opacity: 0.65,
+            marginBottom: "28px",
+            lineHeight: 1.6,
+          }}
+        >
+          Subscribe for the latest announcements, exclusive offers, and skincare
+          tips.
         </p>
 
         {status === "success" ? (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "16px 0" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "12px",
+              padding: "16px 0",
+            }}
+          >
             <CheckCircle2 size={36} style={{ color: "#10b981" }} />
-            <p style={{ fontSize: "13px", color: "#10b981", fontWeight: 500 }}>{message}</p>
+            <p style={{ fontSize: "13px", color: "#10b981", fontWeight: 500 }}>
+              {message}
+            </p>
           </div>
         ) : (
           <>
             <form
               onSubmit={handleSubmit}
-              style={{ display: "flex", gap: "10px", maxWidth: "400px", margin: "0 auto" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                maxWidth: "400px",
+                margin: "0 auto",
+              }}
+              className="newsletter-form"
             >
               <input
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); if (status !== "idle") setStatus("idle"); }}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (status !== "idle") setStatus("idle");
+                }}
                 placeholder="your@email.com"
                 required
                 disabled={status === "loading"}
@@ -95,6 +147,8 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
                   color: "#500724",
                   outline: "none",
                   opacity: status === "loading" ? 0.6 : 1,
+                  width: "100%",
+                  boxSizing: "border-box" as const,
                 }}
               />
               <button
@@ -105,7 +159,8 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
                   border: "none",
                   borderRadius: "100px",
                   cursor: status === "loading" ? "not-allowed" : "pointer",
-                  background: "linear-gradient(135deg, #db2777, #ec4899, #f472b6)",
+                  background:
+                    "linear-gradient(135deg, #db2777, #ec4899, #f472b6)",
                   color: "#fff",
                   fontFamily: "'Jost', sans-serif",
                   fontSize: "11px",
@@ -116,32 +171,47 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
                   opacity: status === "loading" ? 0.6 : 1,
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
                   gap: "6px",
                 }}
               >
                 {status === "loading" && (
-                  <Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} />
+                  <Loader2
+                    size={12}
+                    style={{ animation: "spin 1s linear infinite" }}
+                  />
                 )}
                 {status === "loading" ? "Subscribing…" : "Subscribe"}
               </button>
             </form>
 
             {(status === "error" || status === "duplicate") && (
-              <p style={{
-                marginTop: "10px",
-                fontSize: "12px",
-                color: status === "duplicate" ? "#d97706" : "#ef4444",
-              }}>
+              <p
+                style={{
+                  marginTop: "10px",
+                  fontSize: "12px",
+                  color: status === "duplicate" ? "#d97706" : "#ef4444",
+                }}
+              >
                 {message}
               </p>
             )}
           </>
         )}
+
+        <style>{`
+          @media (min-width: 480px) {
+            .newsletter-form {
+              flex-direction: row !important;
+            }
+          }
+          @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        `}</style>
       </section>
     );
   }
 
-  // ── Default variant (used on home page) ───────────────────────────────────
+  // ── Default variant ───────────────────────────────────────────────────────
   return (
     <section className="py-12 sm:py-16 bg-background">
       <div className="container mx-auto px-4 max-w-2xl">
@@ -161,11 +231,17 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
             </div>
           ) : (
             <>
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 pt-2">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col sm:flex-row gap-3 pt-2"
+              >
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => { setEmail(e.target.value); if (status !== "idle") setStatus("idle"); }}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (status !== "idle") setStatus("idle");
+                  }}
                   placeholder="Enter your email"
                   required
                   disabled={status === "loading"}
@@ -176,13 +252,17 @@ export function NewsletterSection({ variant = "default" }: NewsletterSectionProp
                   disabled={status === "loading"}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-md px-8 py-3 font-semibold whitespace-nowrap disabled:opacity-60 flex items-center justify-center gap-2"
                 >
-                  {status === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {status === "loading" && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  )}
                   {status === "loading" ? "Subscribing…" : "Subscribe"}
                 </button>
               </form>
 
               {(status === "error" || status === "duplicate") && (
-                <p className={`text-xs ${status === "duplicate" ? "text-amber-500" : "text-red-400"}`}>
+                <p
+                  className={`text-xs ${status === "duplicate" ? "text-amber-500" : "text-red-400"}`}
+                >
                   {message}
                 </p>
               )}

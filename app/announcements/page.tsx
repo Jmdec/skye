@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { X, Loader2, AlertCircle } from "lucide-react";
 import { NewsletterSection } from "@/components/newsletter-section";
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Announcement {
@@ -29,11 +30,14 @@ function formatDate(dateStr: string): string {
 // ── Tag ───────────────────────────────────────────────────────────────────────
 
 const tagStyles: Record<string, { bg: string; color: string }> = {
-  "New Arrival": { bg: "linear-gradient(135deg, #fce7f3, #fbcfe8)", color: "#be185d" },
-  Offer:         { bg: "linear-gradient(135deg, #fef3c7, #fde68a)", color: "#92400e" },
-  Event:         { bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", color: "#5b21b6" },
-  Update:        { bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", color: "#065f46" },
-  Blog:          { bg: "linear-gradient(135deg, #dbeafe, #bfdbfe)", color: "#1e40af" },
+  "New Arrival": {
+    bg: "linear-gradient(135deg, #fce7f3, #fbcfe8)",
+    color: "#be185d",
+  },
+  Offer: { bg: "linear-gradient(135deg, #fef3c7, #fde68a)", color: "#92400e" },
+  Event: { bg: "linear-gradient(135deg, #ede9fe, #ddd6fe)", color: "#5b21b6" },
+  Update: { bg: "linear-gradient(135deg, #d1fae5, #a7f3d0)", color: "#065f46" },
+  Blog: { bg: "linear-gradient(135deg, #dbeafe, #bfdbfe)", color: "#1e40af" },
 };
 
 function Tag({ tag }: { tag: string }) {
@@ -62,12 +66,33 @@ function Tag({ tag }: { tag: string }) {
 
 function SectionHeader({ icon, label }: { icon: string; label: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        marginBottom: "20px",
+      }}
+    >
       <span style={{ fontSize: "13px", color: "#ec4899" }}>{icon}</span>
-      <span style={{ fontSize: "10px", letterSpacing: ".28em", textTransform: "uppercase", color: "#ec4899" }}>
+      <span
+        style={{
+          fontSize: "10px",
+          letterSpacing: ".28em",
+          textTransform: "uppercase",
+          color: "#ec4899",
+        }}
+      >
         {label}
       </span>
-      <div style={{ flex: 1, height: "1px", background: "linear-gradient(90deg, rgba(236,72,153,0.3), transparent)" }} />
+      <div
+        style={{
+          flex: 1,
+          height: "1px",
+          background:
+            "linear-gradient(90deg, rgba(236,72,153,0.3), transparent)",
+        }}
+      />
     </div>
   );
 }
@@ -76,19 +101,21 @@ function SectionHeader({ icon, label }: { icon: string; label: string }) {
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState("");
-  const [selected, setSelected]           = useState<Announcement | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selected, setSelected] = useState<Announcement | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch("/api/announcements");
+        const res = await fetch("/api/announcements");
         const json = await res.json();
         if (!res.ok) throw new Error(json.message ?? "Failed to load");
         setAnnouncements(json.data as Announcement[]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load announcements");
+        setError(
+          err instanceof Error ? err.message : "Failed to load announcements",
+        );
       } finally {
         setLoading(false);
       }
@@ -98,15 +125,23 @@ export default function AnnouncementsPage() {
   const featured = announcements.filter((a) => a.featured);
 
   return (
-    <div style={{ fontFamily: "'Jost', sans-serif", fontWeight: 300, background: "#fff0f5" }}>
+    <div
+      style={{
+        fontFamily: "'Jost', sans-serif",
+        fontWeight: 300,
+        background: "#fff0f5",
+        overflowX: "hidden",
+      }}
+    >
       <Header />
 
       <main>
         {/* HERO */}
         <section
           style={{
-            background: "linear-gradient(135deg, #fce7f3 0%, #fbcfe8 30%, #f9a8d4 60%, #f472b6 100%)",
-            padding: "52px 40px 44px",
+            background:
+              "linear-gradient(135deg, #fce7f3 0%, #fbcfe8 30%, #f9a8d4 60%, #f472b6 100%)",
+            padding: "52px 24px 44px",
             textAlign: "center",
           }}
         >
@@ -131,30 +166,65 @@ export default function AnnouncementsPage() {
           <h1
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(44px, 6vw, 72px)",
+              fontSize: "clamp(36px, 6vw, 72px)",
               fontWeight: 300,
               lineHeight: 1.0,
               color: "#500724",
             }}
           >
-            <em style={{ fontStyle: "italic", color: "#be185d" }}>Announcements</em>
+            <em style={{ fontStyle: "italic", color: "#be185d" }}>
+              Announcements
+            </em>
           </h1>
-          <p style={{ fontSize: "13px", color: "#831843", opacity: 0.7, marginTop: "12px" }}>
-            Stay updated with our latest news, product launches, and exclusive offers.
+          <p
+            style={{
+              fontSize: "13px",
+              color: "#831843",
+              opacity: 0.7,
+              marginTop: "12px",
+            }}
+          >
+            Stay updated with our latest news, product launches, and exclusive
+            offers.
           </p>
         </section>
 
         {/* LOADING */}
         {loading && (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", padding: "80px 40px", color: "#ec4899" }}>
-            <Loader2 size={20} style={{ animation: "spin 1s linear infinite" }} />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              padding: "80px 24px",
+              color: "#ec4899",
+            }}
+          >
+            <Loader2
+              size={20}
+              style={{ animation: "spin 1s linear infinite" }}
+            />
             <span style={{ fontSize: "13px" }}>Loading announcements…</span>
           </div>
         )}
 
         {/* ERROR */}
         {!loading && error && (
-          <div style={{ margin: "40px", padding: "20px", background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px", display: "flex", alignItems: "center", gap: "10px", color: "#ef4444", fontSize: "13px" }}>
+          <div
+            style={{
+              margin: "40px 24px",
+              padding: "20px",
+              background: "#fef2f2",
+              border: "1px solid #fecaca",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              color: "#ef4444",
+              fontSize: "13px",
+            }}
+          >
             <AlertCircle size={16} />
             {error}
           </div>
@@ -165,43 +235,43 @@ export default function AnnouncementsPage() {
           <>
             {/* FEATURED */}
             {featured.length > 0 && (
-              <section style={{ padding: "36px 40px 24px" }}>
+              <section className="announce-section">
                 <SectionHeader icon="★" label="Featured" />
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div className="featured-grid">
                   {featured.map((a, i) => (
                     <button
                       key={a.id}
                       onClick={() => setSelected(a)}
-                      style={{
-                        background: "#fff",
-                        border: "1px solid rgba(236,72,153,0.18)",
-                        borderRadius: "16px",
-                        overflow: "hidden",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "transform .25s, box-shadow .25s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-3px)";
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 12px 32px rgba(236,72,153,0.12)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
-                      }}
+                      className="featured-card"
                     >
                       <div
                         style={{
                           height: "3px",
-                          background: i === 0
-                            ? "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4)"
-                            : "linear-gradient(90deg, #f9a8d4, #ec4899, #be185d)",
+                          background:
+                            i === 0
+                              ? "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4)"
+                              : "linear-gradient(90deg, #f9a8d4, #ec4899, #be185d)",
                         }}
                       />
                       <div style={{ padding: "24px" }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "14px",
+                            flexWrap: "wrap",
+                            gap: "8px",
+                          }}
+                        >
                           <Tag tag={a.tag} />
-                          <span style={{ fontSize: "11px", color: "#f4a8c4", opacity: 0.8 }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              color: "#f4a8c4",
+                              opacity: 0.8,
+                            }}
+                          >
                             {formatDate(a.published_at)}
                           </span>
                         </div>
@@ -232,7 +302,15 @@ export default function AnnouncementsPage() {
                         >
                           {a.content}
                         </p>
-                        <span style={{ fontSize: "11px", color: "#ec4899", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "#ec4899",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                        >
                           Read more →
                         </span>
                       </div>
@@ -243,38 +321,28 @@ export default function AnnouncementsPage() {
             )}
 
             {/* ALL ANNOUNCEMENTS */}
-            <section style={{ padding: "8px 40px 36px" }}>
+            <section className="announce-section" style={{ paddingTop: "8px" }}>
               <SectionHeader icon="🔔" label="All Announcements" />
 
               {announcements.length === 0 ? (
-                <p style={{ textAlign: "center", color: "#be185d", opacity: 0.5, fontSize: "13px", padding: "40px 0" }}>
+                <p
+                  style={{
+                    textAlign: "center",
+                    color: "#be185d",
+                    opacity: 0.5,
+                    fontSize: "13px",
+                    padding: "40px 0",
+                  }}
+                >
                   No announcements yet. Check back soon!
                 </p>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+                <div className="all-grid">
                   {announcements.map((a, i) => (
                     <button
                       key={a.id}
                       onClick={() => setSelected(a)}
-                      style={{
-                        background: "#fff",
-                        border: "1px solid rgba(236,72,153,0.15)",
-                        borderRadius: "14px",
-                        padding: "20px",
-                        cursor: "pointer",
-                        position: "relative",
-                        overflow: "hidden",
-                        textAlign: "left",
-                        transition: "transform .2s, box-shadow .2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 8px 24px rgba(236,72,153,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                        (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
-                      }}
+                      className="announce-card"
                     >
                       <div
                         style={{
@@ -284,7 +352,8 @@ export default function AnnouncementsPage() {
                           width: "24px",
                           height: "24px",
                           borderRadius: "50%",
-                          background: "linear-gradient(135deg, #fce7f3, #fbcfe8)",
+                          background:
+                            "linear-gradient(135deg, #fce7f3, #fbcfe8)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -308,11 +377,20 @@ export default function AnnouncementsPage() {
                       >
                         {a.title}
                       </h3>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginTop: "12px",
+                        }}
+                      >
                         <span style={{ fontSize: "10px", color: "#f4a8c4" }}>
                           {formatDate(a.published_at)}
                         </span>
-                        <span style={{ fontSize: "10px", color: "#ec4899" }}>View →</span>
+                        <span style={{ fontSize: "10px", color: "#ec4899" }}>
+                          View →
+                        </span>
                       </div>
                       <div
                         style={{
@@ -321,7 +399,8 @@ export default function AnnouncementsPage() {
                           left: 0,
                           right: 0,
                           height: "2px",
-                          background: "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4)",
+                          background:
+                            "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4)",
                         }}
                       />
                     </button>
@@ -333,7 +412,7 @@ export default function AnnouncementsPage() {
         )}
 
         {/* NEWSLETTER */}
-              <NewsletterSection />
+        <NewsletterSection />
 
         {/* MODAL */}
         {selected && (
@@ -363,9 +442,17 @@ export default function AnnouncementsPage() {
                 boxShadow: "0 24px 64px rgba(236,72,153,0.2)",
                 position: "relative",
                 animation: "slideUp 0.25s ease",
+                maxHeight: "90vh",
+                overflowY: "auto",
               }}
             >
-              <div style={{ height: "3px", background: "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4, #ec4899, #be185d)" }} />
+              <div
+                style={{
+                  height: "3px",
+                  background:
+                    "linear-gradient(90deg, #be185d, #ec4899, #f9a8d4, #ec4899, #be185d)",
+                }}
+              />
               <div style={{ padding: "32px" }}>
                 <button
                   onClick={() => setSelected(null)}
@@ -387,7 +474,15 @@ export default function AnnouncementsPage() {
                 >
                   <X size={14} />
                 </button>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    marginBottom: "16px",
+                    flexWrap: "wrap",
+                  }}
+                >
                   <Tag tag={selected.tag} />
                   <span style={{ fontSize: "11px", color: "#f4a8c4" }}>
                     {formatDate(selected.published_at)}
@@ -405,8 +500,21 @@ export default function AnnouncementsPage() {
                 >
                   {selected.title}
                 </h2>
-                <div style={{ height: "1px", background: "linear-gradient(90deg, #fbcfe8, transparent)", marginBottom: "16px" }} />
-                <p style={{ fontSize: "13px", color: "#831843", lineHeight: 1.75, opacity: 0.8 }}>
+                <div
+                  style={{
+                    height: "1px",
+                    background: "linear-gradient(90deg, #fbcfe8, transparent)",
+                    marginBottom: "16px",
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#831843",
+                    lineHeight: 1.75,
+                    opacity: 0.8,
+                  }}
+                >
                   {selected.content}
                 </p>
                 <button
@@ -418,7 +526,8 @@ export default function AnnouncementsPage() {
                     border: "none",
                     borderRadius: "100px",
                     cursor: "pointer",
-                    background: "linear-gradient(135deg, #db2777, #ec4899, #f472b6)",
+                    background:
+                      "linear-gradient(135deg, #db2777, #ec4899, #f472b6)",
                     color: "#fff",
                     fontFamily: "'Jost', sans-serif",
                     fontSize: "11px",
@@ -439,6 +548,80 @@ export default function AnnouncementsPage() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+        /* Section padding */
+        .announce-section {
+          padding: 36px 24px 24px;
+        }
+        @media (min-width: 768px) {
+          .announce-section {
+            padding: 36px 40px 24px;
+          }
+        }
+
+        /* Featured grid — 1 col mobile, 2 col desktop */
+        .featured-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        @media (min-width: 640px) {
+          .featured-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+
+        /* Featured card */
+        .featured-card {
+          background: #fff;
+          border: 1px solid rgba(236,72,153,0.18);
+          border-radius: 16px;
+          overflow: hidden;
+          cursor: pointer;
+          text-align: left;
+          transition: transform .25s, box-shadow .25s;
+          width: 100%;
+        }
+        .featured-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px rgba(236,72,153,0.12);
+        }
+
+        /* All announcements grid — 1 col mobile, 2 col sm, 3 col lg */
+        .all-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+        @media (min-width: 540px) {
+          .all-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+        @media (min-width: 1024px) {
+          .all-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        /* Announce card */
+        .announce-card {
+          background: #fff;
+          border: 1px solid rgba(236,72,153,0.15);
+          border-radius: 14px;
+          padding: 20px;
+          cursor: pointer;
+          position: relative;
+          overflow: hidden;
+          text-align: left;
+          transition: transform .2s, box-shadow .2s;
+          width: 100%;
+        }
+        .announce-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(236,72,153,0.1);
+        }
+
         input::placeholder { color: rgba(190,24,93,0.35); }
         input:focus { border-color: #ec4899 !important; box-shadow: 0 0 0 3px rgba(236,72,153,0.1); }
         @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
