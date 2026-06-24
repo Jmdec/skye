@@ -38,7 +38,6 @@ const FALLBACK_CATS = [
   { label: "Makeup", color: CATEGORY_COLORS.makeup },
 ];
 
-// ── Inner component — useSearchParams() is safe here inside <Suspense> ──
 function ProductsContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category") ?? undefined;
@@ -76,19 +75,15 @@ function ProductsContent() {
   const displayCats = categoryStats.length > 0 ? categoryStats : FALLBACK_CATS;
 
   return (
-    <main>
+    <main style={{ overflowX: "hidden" }}>
       {/* ── HERO ── */}
       <section
+        className="hero-section"
         style={{
           background:
             "linear-gradient(135deg,#fce7f3 0%,#fbcfe8 30%,#f9a8d4 60%,#f472b6 100%)",
-          padding: "52px 40px 48px",
           position: "relative",
           overflow: "hidden",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "40px",
-          alignItems: "center",
         }}
       >
         {/* Dot grid */}
@@ -135,277 +130,280 @@ function ProductsContent() {
           }}
         />
 
-        {/* ── LEFT: Text content ── */}
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <p
-            className="hero-eyebrow"
-            style={{
-              fontSize: "10px",
-              letterSpacing: ".28em",
-              textTransform: "uppercase",
-              color: "#9d174d",
-              marginBottom: "16px",
-              opacity: 0.8,
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <span className="hero-line" />
-            Est. Sydney, Australia
-          </p>
+        {/* ── Hero inner grid ── */}
+        <div className="hero-inner">
+          {/* ── LEFT: Text content ── */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <p
+              className="hero-eyebrow"
+              style={{
+                fontSize: "10px",
+                letterSpacing: ".28em",
+                textTransform: "uppercase",
+                color: "#9d174d",
+                marginBottom: "16px",
+                opacity: 0.8,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <span className="hero-line" />
+              Est. Sydney, Australia
+            </p>
 
-          <h1
-            className="hero-title"
-            style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(44px,6vw,76px)",
-              fontWeight: 300,
-              lineHeight: 1.02,
-              color: "#500724",
-              marginBottom: "16px",
-            }}
-          >
-            Our{" "}
-            <em style={{ fontStyle: "italic", color: "#be185d" }}>
-              Collection
-            </em>
-          </h1>
+            <h1
+              className="hero-title"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "clamp(36px,6vw,76px)",
+                fontWeight: 300,
+                lineHeight: 1.02,
+                color: "#500724",
+                marginBottom: "16px",
+              }}
+            >
+              Our{" "}
+              <em style={{ fontStyle: "italic", color: "#be185d" }}>
+                Collection
+              </em>
+            </h1>
 
-          <p
-            className="hero-sub"
-            style={{
-              fontSize: "13px",
-              lineHeight: 1.75,
-              color: "#831843",
-              opacity: 0.85,
-              maxWidth: "340px",
-              marginBottom: "28px",
-            }}
-          >
-            Carefully curated luxury beauty — skincare, fragrance &amp;
-            wellness for the modern woman.
-          </p>
+            <p
+              className="hero-sub"
+              style={{
+                fontSize: "13px",
+                lineHeight: 1.75,
+                color: "#831843",
+                opacity: 0.85,
+                maxWidth: "340px",
+                marginBottom: "28px",
+              }}
+            >
+              Carefully curated luxury beauty — skincare, fragrance &amp;
+              wellness for the modern woman.
+            </p>
 
-          <div className="hero-divider" />
+            <div className="hero-divider" />
 
-          {/* Category pills */}
-          <div
-            className="hero-pills"
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "10px",
-              marginBottom: "28px",
-            }}
-          >
-            {displayCats.map((cat) => (
-              
-             <a   key={cat.label}
-                href={`/products?category=${cat.label.toLowerCase()}`}
-                className="cat-pill"
-              >
-                <span className="cat-dot" style={{ background: cat.color }} />
-                {cat.label}
-                {"count" in cat && (
+            {/* Category pills */}
+            <div
+              className="hero-pills"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "10px",
+                marginBottom: "28px",
+              }}
+            >
+              {displayCats.map((cat) => (
+                <a
+                  key={cat.label}
+                  href={`/products?category=${cat.label.toLowerCase()}`}
+                  className="cat-pill"
+                >
+                  <span className="cat-dot" style={{ background: cat.color }} />
+                  {cat.label}
+                  {"count" in cat && (
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        opacity: 0.55,
+                        marginLeft: "2px",
+                      }}
+                    >
+                      ({(cat as CategoryStat).count})
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div
+              className="hero-stats"
+              style={{ display: "flex", gap: "32px" }}
+            >
+              {[
+                ["50+", "Products"],
+                ["4", "Categories"],
+                ["100%", "Authentic"],
+              ].map(([num, label]) => (
+                <div
+                  key={label}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
                   <span
                     style={{
-                      fontSize: "10px",
-                      opacity: 0.55,
-                      marginLeft: "2px",
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: "32px",
+                      fontWeight: 300,
+                      lineHeight: 1,
+                      color: "#be185d",
                     }}
                   >
-                    ({(cat as CategoryStat).count})
+                    {num}
                   </span>
-                )}
-              </a>
-            ))}
+                  <span
+                    style={{
+                      fontSize: "9px",
+                      textTransform: "uppercase",
+                      letterSpacing: ".18em",
+                      color: "#9d174d",
+                      opacity: 0.7,
+                    }}
+                  >
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Stats */}
+          {/* ── RIGHT: Decorative category cards — hidden on mobile ── */}
           <div
-            className="hero-stats"
-            style={{ display: "flex", gap: "32px" }}
+            className="hero-right"
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+            }}
           >
-            {[
-              ["50+", "Products"],
-              ["4", "Categories"],
-              ["100%", "Authentic"],
-            ].map(([num, label]) => (
-              <div
-                key={label}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "4px",
-                }}
+            {displayCats.map((cat, i) => (
+              <a
+                key={cat.label}
+                href={`/products?category=${cat.label.toLowerCase()}`}
+                className="deco-card"
+                style={{ animationDelay: `${0.3 + i * 0.1}s` }}
               >
-                <span
+                {/* Icon circle */}
+                <div
                   style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: "32px",
-                    fontWeight: 300,
-                    lineHeight: 1,
-                    color: "#be185d",
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "50%",
+                    background: cat.color,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "15px",
+                    marginBottom: "10px",
+                    transition: "transform 0.35s ease",
                   }}
+                  className="deco-icon"
                 >
-                  {num}
-                </span>
-                <span
+                  {CATEGORY_ICONS[cat.label.toLowerCase()] ?? "✦"}
+                </div>
+
+                <p
                   style={{
                     fontSize: "9px",
-                    textTransform: "uppercase",
                     letterSpacing: ".18em",
+                    textTransform: "uppercase",
                     color: "#9d174d",
                     opacity: 0.7,
+                    marginBottom: "4px",
                   }}
                 >
-                  {label}
+                  Category
+                </p>
+
+                <p
+                  style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: "18px",
+                    fontWeight: 300,
+                    color: "#500724",
+                    lineHeight: 1.2,
+                    marginBottom: "8px",
+                  }}
+                >
+                  {cat.label}
+                </p>
+
+                {"count" in cat && (
+                  <p
+                    style={{
+                      fontSize: "10px",
+                      color: "#ec4899",
+                      opacity: 0.8,
+                    }}
+                  >
+                    {(cat as CategoryStat).count} products
+                  </p>
+                )}
+
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    fontSize: "10px",
+                    color: "#ec4899",
+                    marginTop: "8px",
+                  }}
+                >
+                  Shop →
                 </span>
-              </div>
+
+                {/* Bottom accent line */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: "2px",
+                    background:
+                      "linear-gradient(90deg,#be185d,#ec4899,#f9a8d4)",
+                  }}
+                />
+              </a>
             ))}
-          </div>
-        </div>
 
-        {/* ── RIGHT: Decorative category cards ── */}
-        <div
-          className="hero-right"
-          style={{
-            position: "relative",
-            zIndex: 1,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
-          {displayCats.map((cat, i) => (
-            
-            <a  key={cat.label}
-              href={`/products?category=${cat.label.toLowerCase()}`}
-              className="deco-card"
-              style={{ animationDelay: `${0.3 + i * 0.1}s` }}
+            {/* Floating badge — contained within hero-right, no negative offsets */}
+            <div
+              className="hero-badge"
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                background: "#fff",
+                border: "1px solid rgba(236,72,153,0.25)",
+                borderRadius: "12px",
+                padding: "10px 16px",
+                boxShadow: "0 4px 20px rgba(236,72,153,0.15)",
+                zIndex: 2,
+              }}
             >
-              {/* Icon circle */}
-              <div
-                style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "50%",
-                  background: cat.color,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "15px",
-                  marginBottom: "10px",
-                  transition: "transform 0.35s ease",
-                }}
-                className="deco-icon"
-              >
-                {CATEGORY_ICONS[cat.label.toLowerCase()] ?? "✦"}
-              </div>
-
               <p
                 style={{
                   fontSize: "9px",
-                  letterSpacing: ".18em",
+                  letterSpacing: ".2em",
                   textTransform: "uppercase",
-                  color: "#9d174d",
-                  opacity: 0.7,
-                  marginBottom: "4px",
+                  color: "#ec4899",
+                  marginBottom: "2px",
                 }}
               >
-                Category
+                Curated
               </p>
-
               <p
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: "18px",
-                  fontWeight: 300,
                   color: "#500724",
-                  lineHeight: 1.2,
-                  marginBottom: "8px",
+                  lineHeight: 1,
                 }}
               >
-                {cat.label}
+                Luxury Only
               </p>
-
-              {"count" in cat && (
-                <p
-                  style={{
-                    fontSize: "10px",
-                    color: "#ec4899",
-                    opacity: 0.8,
-                  }}
-                >
-                  {(cat as CategoryStat).count} products
-                </p>
-              )}
-
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  fontSize: "10px",
-                  color: "#ec4899",
-                  marginTop: "8px",
-                }}
-              >
-                Shop →
-              </span>
-
-              {/* Bottom accent line */}
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: "2px",
-                  background:
-                    "linear-gradient(90deg,#be185d,#ec4899,#f9a8d4)",
-                }}
-              />
-            </a>
-          ))}
-
-          {/* Floating badge */}
-          <div
-            className="hero-badge"
-            style={{
-              position: "absolute",
-              top: "-16px",
-              right: "-16px",
-              background: "#fff",
-              border: "1px solid rgba(236,72,153,0.25)",
-              borderRadius: "12px",
-              padding: "10px 16px",
-              boxShadow: "0 4px 20px rgba(236,72,153,0.15)",
-              zIndex: 2,
-            }}
-          >
-            <p
-              style={{
-                fontSize: "9px",
-                letterSpacing: ".2em",
-                textTransform: "uppercase",
-                color: "#ec4899",
-                marginBottom: "2px",
-              }}
-            >
-              Curated
-            </p>
-            <p
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "18px",
-                color: "#500724",
-                lineHeight: 1,
-              }}
-            >
-              Luxury Only
-            </p>
+            </div>
           </div>
         </div>
       </section>
@@ -418,7 +416,6 @@ function ProductsContent() {
   );
 }
 
-// ── Page shell — Suspense boundary wraps the content that uses useSearchParams ──
 export default function ProductsPage() {
   return (
     <div
@@ -426,6 +423,7 @@ export default function ProductsPage() {
         fontFamily: "'Jost', sans-serif",
         fontWeight: 300,
         background: "#fff0f5",
+        overflowX: "hidden",
       }}
     >
       <Header />
@@ -479,6 +477,36 @@ export default function ProductsPage() {
           to   { opacity:1; transform:scale(1) translateY(0); }
         }
 
+        /* ── Hero layout ── */
+        .hero-section {
+          overflow: hidden;
+        }
+        .hero-inner {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+          padding: 48px 24px 44px;
+          position: relative;
+          align-items: center;
+        }
+        @media (min-width: 768px) {
+          .hero-inner {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 52px 40px 48px;
+          }
+        }
+
+        /* Hide right deco cards on mobile */
+        .hero-right {
+          display: none;
+        }
+        @media (min-width: 768px) {
+          .hero-right {
+            display: grid !important;
+          }
+        }
+
         .hero-eyebrow { opacity:0; animation: fadeSlideLeft 0.55s ease 0.1s forwards; }
         .hero-line {
           display:inline-block; height:1px; width:0; vertical-align:middle;
@@ -494,7 +522,6 @@ export default function ProductsPage() {
         }
         .hero-pills  { opacity:0; animation: fadeUp 0.5s ease 0.65s forwards; }
         .hero-stats  { opacity:0; animation: fadeUp 0.5s ease 0.8s  forwards; }
-        .hero-right  { opacity:0; animation: fadeUp 0.6s ease 0.25s forwards; }
         .hero-badge  { opacity:0; animation: badgePop 0.5s ease 0.9s forwards; }
 
         .cat-pill {

@@ -39,23 +39,14 @@ export default function AboutPage() {
         fontFamily: "'Jost', sans-serif",
         fontWeight: 300,
         background: "#fff0f5",
+        overflowX: "hidden",
       }}
     >
       <Header />
 
       <main>
         {/* HERO */}
-        <section
-          style={{
-            background:
-              "linear-gradient(135deg, #fce7f3 0%, #fbcfe8 30%, #f9a8d4 60%, #f472b6 100%)",
-            padding: "52px 40px 48px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "40px",
-            alignItems: "center",
-          }}
-        >
+        <section className="about-hero">
           {/* LEFT */}
           <div style={{ animation: "heroFadeIn 0.7s ease both" }}>
             <p
@@ -73,7 +64,7 @@ export default function AboutPage() {
             <h1
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "clamp(44px, 6vw, 72px)",
+                fontSize: "clamp(36px, 6vw, 72px)",
                 fontWeight: 300,
                 lineHeight: 1.05,
                 color: "#500724",
@@ -99,14 +90,8 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* RIGHT — animated compact 3-card grid */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "10px",
-            }}
-          >
+          {/* RIGHT — hidden on mobile */}
+          <div className="about-hero-right">
             {pills.map((pill, i) => (
               <div
                 key={pill.label}
@@ -174,13 +159,7 @@ export default function AboutPage() {
         </section>
 
         {/* VALUES */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            borderTop: "1px solid rgba(236,72,153,0.2)",
-          }}
-        >
+        <div className="values-grid">
           {values.map((val, i) => (
             <ValueCard
               key={val.num}
@@ -193,17 +172,7 @@ export default function AboutPage() {
         </div>
 
         {/* STORY */}
-        <section
-          style={{
-            padding: "56px 40px",
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "56px",
-            alignItems: "center",
-            background:
-              "linear-gradient(160deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%)",
-          }}
-        >
+        <section className="story-section">
           <div>
             <p
               style={{
@@ -219,7 +188,7 @@ export default function AboutPage() {
             <h2
               style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "40px",
+                fontSize: "clamp(28px, 5vw, 40px)",
                 fontWeight: 300,
                 color: "#500724",
                 lineHeight: 1.1,
@@ -239,10 +208,13 @@ export default function AboutPage() {
               }}
             >
               <p>
-                At Skye Avenue we bring latest Asia`s trends, viral skincare products from Thailand and  the Philippines ad fashionable accessories to Australia.
+                At Skye Avenue we bring latest Asia&apos;s trends, viral
+                skincare products from Thailand and the Philippines and
+                fashionable accessories to Australia.
               </p>
               <p style={{ marginTop: "12px" }}>
-                Our Mission is to make trendy, affortable, and confidence boosting style accessible to everyone.
+                Our Mission is to make trendy, affordable, and confidence
+                boosting style accessible to everyone.
               </p>
             </div>
           </div>
@@ -319,14 +291,14 @@ export default function AboutPage() {
           style={{
             background:
               "linear-gradient(135deg, #db2777 0%, #ec4899 40%, #f472b6 70%, #f9a8d4 100%)",
-            padding: "56px 40px",
+            padding: "56px 24px",
             textAlign: "center",
           }}
         >
           <h2
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "48px",
+              fontSize: "clamp(36px, 6vw, 48px)",
               fontWeight: 300,
               color: "#fff",
               lineHeight: 1.1,
@@ -371,52 +343,96 @@ export default function AboutPage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
 
-        /* ── Page load: left text slides in from left ── */
         @keyframes heroFadeIn {
           from { opacity: 0; transform: translateX(-18px); }
           to   { opacity: 1; transform: translateX(0); }
         }
-
-        /* ── Cards stagger fade up on load ── */
         @keyframes cardFadeUp {
           from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ── Hover: lift + glow ── */
+        /* HERO */
+        .about-hero {
+          background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 30%, #f9a8d4 60%, #f472b6 100%);
+          padding: 48px 24px 44px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+          align-items: center;
+          overflow: hidden;
+        }
+        @media (min-width: 768px) {
+          .about-hero {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 52px 40px 48px;
+          }
+        }
+
+        /* Hide right cards on mobile */
+        .about-hero-right {
+          display: none;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 10px;
+        }
+        @media (min-width: 768px) {
+          .about-hero-right {
+            display: grid;
+          }
+        }
+
+        /* VALUES */
+        .values-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          border-top: 1px solid rgba(236,72,153,0.2);
+        }
+        @media (min-width: 768px) {
+          .values-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
+        /* STORY */
+        .story-section {
+          padding: 48px 24px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 40px;
+          align-items: center;
+          background: linear-gradient(160deg, #fdf2f8 0%, #fce7f3 50%, #fbcfe8 100%);
+        }
+        @media (min-width: 768px) {
+          .story-section {
+            grid-template-columns: 1fr 1fr;
+            gap: 56px;
+            padding: 56px 40px;
+          }
+        }
+
         .pill-card:hover {
           transform: translateY(-6px) scale(1.04) !important;
           box-shadow: 0 18px 40px rgba(236, 72, 153, 0.2);
           background: rgba(255, 255, 255, 0.75) !important;
         }
-
-        /* ── Icon rotates + scales on card hover ── */
         .pill-card:hover .pill-icon {
           transform: rotate(20deg) scale(1.18);
         }
-
-        /* ── Shimmer sweep across card on hover ── */
         .pill-card {
           position: relative;
           overflow: hidden;
         }
-
         .pill-card::after {
           content: '';
           position: absolute;
           inset: 0;
-          background: linear-gradient(
-            110deg,
-            transparent 25%,
-            rgba(255, 255, 255, 0.5) 50%,
-            transparent 75%
-          );
+          background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.5) 50%, transparent 75%);
           transform: translateX(-100%);
           transition: transform 0.55s ease;
           pointer-events: none;
           border-radius: 14px;
         }
-
         .pill-card:hover::after {
           transform: translateX(120%);
         }
