@@ -8,58 +8,36 @@ import { Button } from "@/components/ui/button";
 const slides = [
   {
     id: 1,
-    image:
-      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1400&auto=format&fit=crop&q=80",
+    image: "/hero1.jpg",
     label: "Skincare",
     headline: "Luminous",
     subheadline: "Radiance",
-    description: "Vitamin C serums & botanicals that transform your glow",
+    description:
+      "A Bangkok Fashion themed flat-lay/lifestyle shot featuring a stylish outfit (jacket/coat draped over a stand), a handbag, and folded clothing items arranged on a warm beige/tan background with some botanical or patterned accents in the corners",
     cta: "Shop Skincare",
     accent: "#f9a8c9",
   },
   {
     id: 2,
-    image:
-      "https://images.unsplash.com/photo-1590580463662-88d585eda98f?w=1400&auto=format&fit=crop&q=80",
+    image: "/hero2.jpg",
     label: "Fragrance",
     headline: "Velvet",
     subheadline: "Bloom",
-    description: "Intoxicating florals drawn from an Australian native garden",
+    description:
+      "A row of knitted sweaters/cardigans hanging on wooden hangers against a neutral backdrop, showing a color gradient from cream/white through pink and red tones — a clean, minimal clothing-rack style shot",
     cta: "Shop Fragrance",
     accent: "#f3c4d3",
   },
   {
     id: 3,
-    image:
-      "https://images.unsplash.com/photo-1601049676869-702ea24cfd58?w=1400&auto=format&fit=crop&q=80",
+    image: "/hero3.jpg",
     label: "Night Care",
     headline: "Silk",
     subheadline: "Renewal",
-    description: "Peptide-rich night creams that work while you rest",
+    description:
+      "A skincare/cosmetics product lineup, showing several bottles and tubes (lotions, serums, or fragrance bottles) in soft pink and cream packaging, arranged on a warm beige surface with soft natural lighting — fits a Night Care or beauty product theme",
     cta: "Shop Night Care",
     accent: "#e8b4c8",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=1400&auto=format&fit=crop&q=80",
-    label: "Wellness",
-    headline: "Inner",
-    subheadline: "Harmony",
-    description: "Botanical teas & oils for mind, body and spirit",
-    cta: "Shop Wellness",
-    accent: "#c8d8b4",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=1400&auto=format&fit=crop&q=80",
-    label: "Aromatherapy",
-    headline: "Pure",
-    subheadline: "Essence",
-    description: "Essential oils sourced from nature's finest botanicals",
-    cta: "Shop Oils",
-    accent: "#d4c4f0",
   },
 ];
 
