@@ -9,23 +9,23 @@ const slides = [
   {
     id: 1,
     image: "/hero1.jpg",
-    label: "Skincare",
-    headline: "Luminous",
-    subheadline: "Radiance",
+    label: "Fashion",
+    headline: "Bangkok",
+    subheadline: "Edit",
     description:
-      "A Bangkok Fashion themed flat-lay/lifestyle shot featuring a stylish outfit (jacket/coat draped over a stand), a handbag, and folded clothing items arranged on a warm beige/tan background with some botanical or patterned accents in the corners",
-    cta: "Shop Skincare",
+      "Curated outerwear, bags, and layers inspired by Bangkok street style",
+    cta: "Shop Fashion",
     accent: "#f9a8c9",
   },
   {
     id: 2,
     image: "/hero2.jpg",
-    label: "Fragrance",
-    headline: "Velvet",
-    subheadline: "Bloom",
+    label: "Knitwear",
+    headline: "Cozy",
+    subheadline: "Layers",
     description:
-      "A row of knitted sweaters/cardigans hanging on wooden hangers against a neutral backdrop, showing a color gradient from cream/white through pink and red tones — a clean, minimal clothing-rack style shot",
-    cta: "Shop Fragrance",
+      "Soft knit cardigans and sweaters in warm cream, blush, and berry tones",
+    cta: "Shop Knitwear",
     accent: "#f3c4d3",
   },
   {
@@ -35,7 +35,7 @@ const slides = [
     headline: "Silk",
     subheadline: "Renewal",
     description:
-      "A skincare/cosmetics product lineup, showing several bottles and tubes (lotions, serums, or fragrance bottles) in soft pink and cream packaging, arranged on a warm beige surface with soft natural lighting — fits a Night Care or beauty product theme",
+      "Peptide-rich night creams and serums that work while you rest",
     cta: "Shop Night Care",
     accent: "#e8b4c8",
   },
