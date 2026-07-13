@@ -90,7 +90,7 @@ export default function ContactPage() {
       value: "046603755",
       href: "tel:046603755",
     },
-    { icon: "⌖", label: "Location", value: "Sydney, Australia", href: null },
+    { icon: "⌖", label: "Location", value: "Albany, Australia", href: null },
   ];
 
   const hours = [

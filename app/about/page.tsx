@@ -59,7 +59,7 @@ export default function AboutPage() {
                 opacity: 0.8,
               }}
             >
-              Est. Sydney, Australia
+              Est. Albany, Australia
             </p>
             <h1
               style={{
@@ -280,7 +280,7 @@ export default function AboutPage() {
                   color: "#500724",
                 }}
               >
-                Sydney, AU
+                Albany, AU
               </p>
             </div>
           </div>

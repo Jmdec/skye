@@ -149,7 +149,7 @@ function ProductsContent() {
               }}
             >
               <span className="hero-line" />
-              Est. Sydney, Australia
+              Est. Albany, Australia
             </p>
 
             <h1
