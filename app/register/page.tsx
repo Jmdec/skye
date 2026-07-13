@@ -303,7 +303,7 @@ export default function RegisterPage() {
             <Field label="Phone number" error={errors.phone_number}>
               <input
                 type="tel"
-                placeholder="+63 9xx xxx xxxx"
+                placeholder="+61 4xx xxx xxx"
                 value={form.phone_number}
                 onChange={(e) => set("phone_number", e.target.value)}
                 className="skye-input"
@@ -313,7 +313,7 @@ export default function RegisterPage() {
 
             <Field label="Full address" error={errors.full_address}>
               <textarea
-                placeholder="123 Rizal St, Quezon City, Metro Manila"
+                placeholder="123 George St, Sydney, NSW 2000"
                 value={form.full_address}
                 onChange={(e) => set("full_address", e.target.value)}
                 className="skye-input"
