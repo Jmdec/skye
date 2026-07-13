@@ -89,13 +89,13 @@ const SHIPPING_METHODS = [
     value: "standard",
     label: "Standard",
     description: "2 to 8 business days",
-    cost: 10,
+    cost: 15,
   },
   {
     value: "express",
     label: "Express",
     description: "1 to 4 business days",
-    cost: 15,
+    cost: 20,
   },
 ];
 
