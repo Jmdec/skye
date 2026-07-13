@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Lock,
   Store,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart-store";
@@ -34,13 +35,29 @@ interface Address {
   country: string;
 }
 
+interface NominatimSuggestion {
+  place_id: number;
+  display_name: string;
+  address?: {
+    house_number?: string;
+    road?: string;
+    suburb?: string;
+    city?: string;
+    town?: string;
+    municipality?: string;
+    state?: string;
+    postcode?: string;
+    country?: string;
+  };
+}
+
 const EMPTY_ADDRESS: Address = {
   line1: "",
   line2: "",
   city: "",
   state: "",
   zip: "",
-  country: "",
+  country: "Australia",
 };
 
 const PAYMENT_METHODS = [
@@ -170,6 +187,16 @@ export function CheckoutForm() {
   const [orderNumber, setOrderNumber] = useState("");
   const [lastAddress, setLastAddress] = useState(false);
 
+  // ── Address autocomplete (OpenStreetMap Nominatim — free, no API key, AU only) ──
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    NominatimSuggestion[]
+  >([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipNextSearch = useRef(false);
+  const addressBoxRef = useRef<HTMLDivElement | null>(null);
+
   const shippingCost =
     SHIPPING_METHODS.find((m) => m.value === shippingMethod)?.cost ?? 10;
   const total = subtotal + shippingCost;
@@ -200,7 +227,7 @@ export function CheckoutForm() {
               city: addr.city ?? "",
               state: addr.state ?? "",
               zip: addr.zip ?? "",
-              country: addr.country ?? "",
+              country: addr.country ?? "Australia",
             });
             setLastAddress(true);
           } else if (user.full_address) {
@@ -219,10 +246,99 @@ export function CheckoutForm() {
     fetchUserAndAddress();
   }, []);
 
+  // ── Close suggestion dropdown on outside click ────────────────────────────
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        addressBoxRef.current &&
+        !addressBoxRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ── Cleanup pending debounce timer on unmount ─────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    };
+  }, []);
+
   const isLocked = !!authUser;
 
   const setAddr = (field: keyof Address, value: string) =>
     setShippingAddr((prev) => ({ ...prev, [field]: value }));
+
+  // ── Address search (Nominatim, restricted to Australia) ──────────────────
+  const handleLine1Change = (value: string) => {
+    setAddr("line1", value);
+    if (errors["shipping_address.line1"]) {
+      setErrors((prev) => ({ ...prev, ["shipping_address.line1"]: "" }));
+    }
+
+    if (skipNextSearch.current) {
+      skipNextSearch.current = false;
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+
+    if (value.trim().length < 3) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    searchTimeout.current = setTimeout(async () => {
+      setSearchingAddress(true);
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=au&limit=5&q=${encodeURIComponent(
+            value,
+          )}`,
+        );
+        if (res.ok) {
+          const data: NominatimSuggestion[] = await res.json();
+          setAddressSuggestions(data);
+          setShowSuggestions(data.length > 0);
+        }
+      } catch {
+        // Free public API — fail silently and let the user type manually
+      } finally {
+        setSearchingAddress(false);
+      }
+    }, 400);
+  };
+
+  const selectSuggestion = (place: NominatimSuggestion) => {
+    const a = place.address ?? {};
+    const streetLine =
+      [a.house_number, a.road].filter(Boolean).join(" ") ||
+      place.display_name.split(",")[0];
+
+    skipNextSearch.current = true;
+    setShippingAddr((prev) => ({
+      ...prev,
+      line1: streetLine,
+      city: a.city || a.town || a.suburb || a.municipality || prev.city,
+      state: a.state || prev.state,
+      zip: a.postcode || prev.zip,
+      country: a.country || "Australia",
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      ["shipping_address.line1"]: "",
+      ["shipping_address.city"]: "",
+      ["shipping_address.zip"]: "",
+      ["shipping_address.country"]: "",
+    }));
+    setAddressSuggestions([]);
+    setShowSuggestions(false);
+  };
 
   // ── Validation ────────────────────────────────────────────────────────────
   const validate = () => {
@@ -498,7 +614,7 @@ export function CheckoutForm() {
                       !isLocked && setCustomerPhone(e.target.value)
                     }
                     readOnly={isLocked}
-                    placeholder="+63 9XX XXX XXXX"
+                    placeholder="+61 4XX XXX XXX"
                     className={iCls(undefined, isLocked)}
                   />
                 </Field>
@@ -509,17 +625,52 @@ export function CheckoutForm() {
                 <h3 className="font-serif text-lg text-foreground mb-2">
                   Shipping Address
                 </h3>
-                <Field
-                  label="Address Line 1"
-                  error={errors["shipping_address.line1"]}
-                >
-                  <input
-                    value={shippingAddr.line1}
-                    onChange={(e) => setAddr("line1", e.target.value)}
-                    placeholder="123 Street Name"
-                    className={iCls(errors["shipping_address.line1"])}
-                  />
-                </Field>
+
+                {/* Address Line 1 with AU autocomplete (OpenStreetMap Nominatim) */}
+                <div ref={addressBoxRef} className="relative">
+                  <Field
+                    label="Address Line 1"
+                    error={errors["shipping_address.line1"]}
+                  >
+                    <div className="relative">
+                      <input
+                        value={shippingAddr.line1}
+                        onChange={(e) => handleLine1Change(e.target.value)}
+                        onFocus={() =>
+                          addressSuggestions.length > 0 &&
+                          setShowSuggestions(true)
+                        }
+                        placeholder="Start typing your street address…"
+                        autoComplete="off"
+                        className={iCls(errors["shipping_address.line1"])}
+                      />
+                      {searchingAddress && (
+                        <Loader2 className="w-4 h-4 text-pink-300 animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
+                      )}
+                    </div>
+                  </Field>
+
+                  {showSuggestions && addressSuggestions.length > 0 && (
+                    <ul className="absolute z-20 mt-1 w-full bg-white border border-pink-100 rounded-xl shadow-lg overflow-hidden max-h-64 overflow-y-auto">
+                      {addressSuggestions.map((s) => (
+                        <li key={s.place_id}>
+                          <button
+                            type="button"
+                            onClick={() => selectSuggestion(s)}
+                            className="w-full text-left flex items-start gap-2 px-3.5 py-2.5 text-sm text-foreground/80 hover:bg-pink-50 transition-colors"
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-pink-300 shrink-0 mt-0.5" />
+                            <span className="truncate">{s.display_name}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <p className="text-[10px] text-foreground/30 mt-1">
+                    Australian addresses powered by OpenStreetMap
+                  </p>
+                </div>
+
                 <Field label="Address Line 2 (optional)">
                   <input
                     value={shippingAddr.line2}
@@ -533,28 +684,28 @@ export function CheckoutForm() {
                     <input
                       value={shippingAddr.city}
                       onChange={(e) => setAddr("city", e.target.value)}
-                      placeholder="Manila"
+                      placeholder="Sydney"
                       className={iCls(errors["shipping_address.city"])}
                     />
                   </Field>
-                  <Field label="State / Province">
+                  <Field label="State / Territory">
                     <input
                       value={shippingAddr.state}
                       onChange={(e) => setAddr("state", e.target.value)}
-                      placeholder="Metro Manila"
+                      placeholder="NSW"
                       className={iCls()}
                     />
                   </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <Field
-                    label="ZIP / Postal Code"
+                    label="Postcode"
                     error={errors["shipping_address.zip"]}
                   >
                     <input
                       value={shippingAddr.zip}
                       onChange={(e) => setAddr("zip", e.target.value)}
-                      placeholder="1000"
+                      placeholder="2000"
                       className={iCls(errors["shipping_address.zip"])}
                     />
                   </Field>
@@ -565,7 +716,7 @@ export function CheckoutForm() {
                     <input
                       value={shippingAddr.country}
                       onChange={(e) => setAddr("country", e.target.value)}
-                      placeholder="Philippines"
+                      placeholder="Australia"
                       className={iCls(errors["shipping_address.country"])}
                     />
                   </Field>
